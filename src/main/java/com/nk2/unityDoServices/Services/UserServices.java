@@ -1,5 +1,6 @@
 package com.nk2.unityDoServices.Services;
 
+import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
 import com.nk2.unityDoServices.DTOs.RegistrantDTO;
 import com.nk2.unityDoServices.DTOs.UserDTO;
 import com.nk2.unityDoServices.Entities.Registration;
@@ -33,9 +34,9 @@ public class UserServices {
     @Autowired
     private UserMapperService userMapperService;
 
-    public User save(UserDTO user) {
+    public User save(CreateNewUserDTO user) {
         User isUser = userRepository.findUserbyUserName(user.getUsername());
-        if(isUser == null){
+        if (isUser == null) {
             System.out.println("create new user");
             User newUser = modelMapper.map(user, User.class);
             newUser.setName(user.getName());
@@ -58,30 +59,30 @@ public class UserServices {
             newUser.setCreateTime(user.getCreateTime());
             newUser.setUpdateTime(user.getUpdateTime());
             userRepository.save(newUser);
-            System.out.println("created user : "+newUser.getUsername());
+            System.out.println("created user : " + newUser.getUsername());
             return modelMapper.map(newUser, User.class);
-        }else{
-            System.out.println("Username used in ID : "+ isUser.getId());
+        } else {
+            System.out.println("Username used in ID : " + isUser.getId());
             return isUser;
         }
-    };
+    }
 
-    public List<UserDTO> getUserList(){
+    public List<UserDTO> getUserList() {
         List<User> userList = userRepository.findAll();
         return listMapper.mapList(userList, UserDTO.class, modelMapper);
-    };
+    }
 
-    public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId){
+    public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
         List<RegistrantDTO> registrantList = userMapperService.mapToRegistrantDTO(userList);
         return registrantList;
-    };
+    }
 
-    public UserDTO getUserById(Integer userId){
+    public UserDTO getUserById(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 userId + " does not exist !!!"));
         return modelMapper.map(user, UserDTO.class);
-    };
+    }
 
 
     public Integer delete(Integer id) {
@@ -89,9 +90,9 @@ public class UserServices {
                 id + " does not exist !!!"));
         userRepository.deleteById(id);
         return id;
-    };
+    }
 
-    public User update(Integer id, UserDTO updateUser ){
+    public User update(Integer id, UserDTO updateUser) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
         user.setName(updateUser.getName());
@@ -117,7 +118,7 @@ public class UserServices {
         return user;
     }
 
-    public Registration updateRegistration(Integer id, String status ){
+    public Registration updateRegistration(Integer id, String status) {
         Registration registration = registrationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
         registration.setStatus(status);

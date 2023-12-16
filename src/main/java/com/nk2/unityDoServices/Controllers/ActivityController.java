@@ -4,15 +4,13 @@ import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Services.ActivityServices;
 import com.nk2.unityDoServices.Services.UserServices;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@Validated
 @RequestMapping("/api/activities")
 public class ActivityController {
 
@@ -77,9 +75,9 @@ public class ActivityController {
     }
 
     @PostMapping("")
-    public ActivityDTO createActivity(@RequestPart("activity") CreateNewActivityDTO activity
-            , @RequestPart("location") LocationDTO location
-            , @RequestPart("user") String userName) {
+    public ActivityDTO createActivity(@Valid @RequestPart("activity") CreateNewActivityDTO activity
+            , @Valid @RequestPart("location") LocationDTO location
+            , @Valid @RequestPart("user") String userName) {
         return activityServices.save(activity, location, userName);
     }
 

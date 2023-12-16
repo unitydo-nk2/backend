@@ -2,6 +2,10 @@ package com.nk2.unityDoServices.DTOs;
 
 import com.nk2.unityDoServices.Enums.Role;
 import com.nk2.unityDoServices.Validators.EnumValidator;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +13,6 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDate;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 @Getter
 @Setter

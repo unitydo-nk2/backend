@@ -1,6 +1,8 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.*;
+import com.nk2.unityDoServices.DTOs.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
+import com.nk2.unityDoServices.DTOs.UserDTO;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.ActivityServices;
@@ -24,7 +26,7 @@ public class UserController {
     @GetMapping("/list")
     public List<UserDTO> getActivityList() {
         return userServices.getUserList();
-    };
+    }
 
     @GetMapping("/{userId}")
     public UserDTO getActivityDetailsById(@PathVariable Integer userId) {
@@ -32,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/activities")
-    public List<ActivityWithStatusDTO> getRegisteredActivity(@PathVariable  Integer id) {
+    public List<ActivityWithStatusDTO> getRegisteredActivity(@PathVariable Integer id) {
         return activityServices.getRegisteredActivity(id);
     }
 
@@ -42,14 +44,14 @@ public class UserController {
     }
 
     @PostMapping("")
-    public User createNewUser(@RequestPart("user") UserDTO user) {
+    public User createNewUser(@RequestPart("user") CreateNewUserDTO user) {
         return userServices.save(user);
     }
 
     @PatchMapping("/registration/{id}")
     public Registration updateUserRegistration(@Valid @RequestPart("status") String status
             , @PathVariable Integer id) {
-        return userServices.updateRegistration(id,status);
+        return userServices.updateRegistration(id, status);
     }
 
     @PatchMapping("/{id}")

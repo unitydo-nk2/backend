@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Future;
-import java.time.Instant;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,6 +12,4 @@ import java.time.Instant;
 public class ActivityRegisterDTO {
     private Integer userId;
     private Integer activityId;
-    @Future(message = "registration should be future date time")
-    private Instant registrationDate;
 }
