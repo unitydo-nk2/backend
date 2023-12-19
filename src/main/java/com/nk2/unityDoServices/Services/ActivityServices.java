@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLOutput;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -102,9 +103,11 @@ public class ActivityServices {
     }
 
     public Instant convertDateTimeInstant(String dateTimeLocalString) {
+        System.out.println("dateTimeLocalString = "+dateTimeLocalString);
         LocalDateTime localDateTime = LocalDateTime.parse(dateTimeLocalString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
         ZoneId zoneId = ZoneId.of("UTC");
         Instant instant = localDateTime.atZone(zoneId).toInstant();
+        System.out.println("toInstant = "+instant);
         return instant;
     }
 
@@ -167,7 +170,6 @@ public class ActivityServices {
         Category activityCategory = categoryRepository.findById(activity.getCategoryId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Event id " + activity.getCategoryId() + " Does Not Exist !!!"));
-        System.out.println("id = " + activityCategory.getId());
         Location activityLocation = locationServices.save(location);
         newActivity.setActivityName(activity.getActivityName());
         newActivity.setActivityDate(convertDateTimeInstant(activity.getActivityDate()));
@@ -188,6 +190,11 @@ public class ActivityServices {
         newActivity.setCreateTime(Instant.now());
         newActivity.setActivityEndDate(convertDateTimeInstant(activity.getActivityEndDate()));
         newActivity.setActivityStatus("Active");
+        System.out.println(activity.getActivityDate() + " new activity getActivityDate "+ newActivity.getActivityDate());
+        System.out.println(activity.getActivityEndDate() + " new activity getActivityEndDate "+ newActivity.getActivityEndDate());
+        System.out.println(activity.getRegisterStartDate() + " new activity getRegisterStartDate "+ newActivity.getRegisterStartDate());
+        System.out.println(activity.getRegisterEndDate() + " new activity getRegisterEndDate "+ newActivity.getRegisterEndDate());
+        System.out.println(activity.getAnnouncementDate() + " new activity getAnnouncementDate "+ newActivity.getAnnouncementDate());
         repository.saveAndFlush(newActivity);
         return new ActivityDTO(newActivity);
     }
