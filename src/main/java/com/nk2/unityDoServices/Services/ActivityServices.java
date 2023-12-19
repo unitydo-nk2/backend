@@ -235,7 +235,7 @@ public class ActivityServices {
         registration.setRegistrationDate(Instant.now());
         registration.setActivityId(activity);
         registration.setUserId(newUser);
-        registration.setStatus("s");
+        registration.setStatus("registered");
         return registrationRepository.saveAndFlush(registration);
     }
 
