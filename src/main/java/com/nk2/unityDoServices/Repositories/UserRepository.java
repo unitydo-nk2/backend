@@ -11,6 +11,6 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     User findUserbyUserName (String username);
     @Query(value = "select u.* from user u inner join registration r on u.userId = r.userid where r.activityId = :activityId", nativeQuery = true)
     List<User> findRegisteredUserFromActivityId (Integer activityId);
-    @Query(value = "select u.*, r.status from user u inner join registration r on u.userId = r.userid where r.activityId = :activityId", nativeQuery = true)
+    @Query(value = "select u.* , r.status, r.registrationId, r.registrationDate from user u inner join registration r on u.userId = r.userid where r.activityId = :activityId", nativeQuery = true)
     List<Object[]> findRegisteredUserWithStatusFromActivityId (Integer activityId);
 }

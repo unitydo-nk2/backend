@@ -30,7 +30,8 @@ public class UserMapperService {
         dto.setSurName((String) result[4]);
         dto.setGender((String) result[7]);
         dto.setStatus((String) result[20]);
-        dto.setRegistrationDate(((Timestamp) result[19]).toInstant());
+        dto.setRegistrationDate(((Timestamp) result[22]).toInstant());
+        dto.setRegistrationId(((Number) result[21]).intValue());
         return dto;
     }
 }

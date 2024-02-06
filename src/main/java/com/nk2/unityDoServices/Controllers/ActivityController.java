@@ -69,6 +69,13 @@ public class ActivityController {
         return userServices.getUserRegisteredActivity(activityId);
     }
 
+//    @GetMapping("/{activityId}/registrants")
+//    public     List<Object[]>
+//    getActivityRegistrants(@PathVariable Integer activityId) {
+//        return userServices.getUserRegisteredActivity(activityId);
+//    }
+
+
     @DeleteMapping("/{id}")
     public Integer deleteActivity(@PathVariable Integer id) {
         return activityServices.delete(id);

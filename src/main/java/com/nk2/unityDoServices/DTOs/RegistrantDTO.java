@@ -19,4 +19,5 @@ public class RegistrantDTO {
     private String gender;
     private String status;
     private Instant registrationDate;
+    private Integer registrationId;
 }

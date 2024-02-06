@@ -74,9 +74,15 @@ public class UserServices {
 
     public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
+//        System.out.println("userList : "+userList);
         List<RegistrantDTO> registrantList = userMapperService.mapToRegistrantDTO(userList);
         return registrantList;
     }
+
+//    public List<Object[]> getUserRegisteredActivity(Integer activityId) {
+//        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
+//        return userList;
+//    }
 
     public UserDTO getUserById(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
