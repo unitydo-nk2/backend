@@ -1,8 +1,10 @@
 package com.nk2.unityDoServices.Controllers;
 
 import com.nk2.unityDoServices.DTOs.*;
+import com.nk2.unityDoServices.Entities.Image;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Services.ActivityServices;
+import com.nk2.unityDoServices.Services.ImageServices;
 import com.nk2.unityDoServices.Services.UserServices;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class ActivityController {
 
     @Autowired
     private UserServices userServices;
+
+    @Autowired
+    private ImageServices imageServices;
 
     @GetMapping("/list")
     public List<ActivityListDTO> getActivityList() {
@@ -86,6 +91,11 @@ public class ActivityController {
             , @Valid @RequestPart("location") LocationDTO location
             , @Valid @RequestPart("user") String userName) {
         return activityServices.save(activity, location, userName);
+    }
+
+    @PostMapping("")
+    public Image imageUpload(@Valid @RequestPart("image") Image image) {
+        return imageServices.save(image);
     }
 
     @PatchMapping("/{id}")
