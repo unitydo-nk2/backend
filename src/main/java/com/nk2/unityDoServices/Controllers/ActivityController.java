@@ -59,11 +59,6 @@ public class ActivityController {
         return activityServices.getCommonActivityInfoByID(activityId);
     }
 
-//    @PostMapping("/{activityId}/registration")
-//    public Registration createActivityRegistration(@Valid @RequestPart("registration") ActivityRegisterDTO activityRegistration) {
-//        return activityServices.registerActivity(activityRegistration);
-//    }
-
     @PostMapping("/{activityId}/registration")
     public Registration createActivityRegistration(@Valid @RequestPart("user") UserRegistrationDTO user,@PathVariable Integer activityId) {
         return activityServices.registerActivity(user,activityId);
@@ -73,13 +68,6 @@ public class ActivityController {
     public List<RegistrantDTO> getActivityRegistrants(@PathVariable Integer activityId) {
         return userServices.getUserRegisteredActivity(activityId);
     }
-
-//    @GetMapping("/{activityId}/registrants")
-//    public     List<Object[]>
-//    getActivityRegistrants(@PathVariable Integer activityId) {
-//        return userServices.getUserRegisteredActivity(activityId);
-//    }
-
 
     @DeleteMapping("/{id}")
     public Integer deleteActivity(@PathVariable Integer id) {
@@ -93,9 +81,15 @@ public class ActivityController {
         return activityServices.save(activity, location, userName);
     }
 
-    @PostMapping("")
+    @PostMapping("/image")
     public Image imageUpload(@Valid @RequestPart("image") Image image) {
         return imageServices.save(image);
+    }
+
+    @PatchMapping("/image/{id}")
+    public Image updateImageUpload(@Valid @RequestPart("updateImage") Image updateImage
+            , @PathVariable Integer id) {
+        return imageServices.update(id, updateImage);
     }
 
     @PatchMapping("/{id}")

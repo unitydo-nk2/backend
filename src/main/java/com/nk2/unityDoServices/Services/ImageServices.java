@@ -1,9 +1,6 @@
 package com.nk2.unityDoServices.Services;
 
-import com.nk2.unityDoServices.DTOs.ActivityDTO;
-import com.nk2.unityDoServices.DTOs.CreateNewActivityDTO;
-import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
-import com.nk2.unityDoServices.DTOs.LocationDTO;
+import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.*;
 import com.nk2.unityDoServices.Repositories.ImageRepository;
 import org.springframework.http.HttpStatus;
@@ -19,6 +16,15 @@ public class ImageServices {
 
     public Image save(Image image) {
         return repository.saveAndFlush(image);
+    }
+
+    public Image update(Integer id, Image updatedImage) {
+        Image editedImage = repository.findById(id).map(image -> {
+            image.setImagepath(updatedImage.getImagepath());
+            return image;
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity id " + id + " Does Not Exist !!!"));
+        repository.saveAndFlush(editedImage);
+        return editedImage;
     }
 
 }
