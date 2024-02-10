@@ -11,4 +11,9 @@ import java.util.List;
 public interface ImageRepository extends JpaRepository<Image,Integer> {
     @Query(value = "select u.* from image u where u.label = 'poster'", nativeQuery = true)
     List<Image> findActivityPoster();
+
+
+    @Query(value = "SELECT i.* FROM image i " +
+            "WHERE i.activityId = :activityId ",nativeQuery = true)
+    List<Image> getImageListbyActivityId(Integer activityId);
 }

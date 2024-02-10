@@ -54,6 +54,11 @@ public class ActivityController {
         return activityServices.getActivityByID(activityId);
     }
 
+    @GetMapping("/{activityId}/images")
+    public List<ImageDTO> getImagesByActivityId(@PathVariable Integer activityId) {
+        return imageServices.getImagesByActivityId(activityId);
+    }
+
     @GetMapping("/registration/{activityId}")
     public CommonActivityDTO getCommonActivityInfoByID(@PathVariable Integer activityId) {
         return activityServices.getCommonActivityInfoByID(activityId);
@@ -81,15 +86,15 @@ public class ActivityController {
         return activityServices.save(activity, location, userName);
     }
 
-    @PostMapping("/image")
-    public Image imageUpload(@Valid @RequestPart("image") Image image) {
+    @PostMapping("/images")
+    public Image imageUpload(@Valid @RequestPart("image") CreateNewImageDTO image) {
         return imageServices.save(image);
     }
 
-    @PatchMapping("/image/{id}")
-    public Image updateImageUpload(@Valid @RequestPart("updateImage") Image updateImage
+    @PatchMapping("/images/{id}")
+    public Image updateImageUpload(@Valid @RequestPart("updateImage") String updatePath
             , @PathVariable Integer id) {
-        return imageServices.update(id, updateImage);
+        return imageServices.update(id, updatePath);
     }
 
     @PatchMapping("/{id}")
