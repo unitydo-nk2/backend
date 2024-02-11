@@ -76,12 +76,14 @@ public class UserServices {
         return listMapper.mapList(userList, UserDTO.class, modelMapper);
     }
 
-    public List<RegistrantDetailsDTO> getRegistrantDetails(Integer activityId) {
-        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
+    public RegistrantDetailsDTO getRegistrantDetails(Integer activityId) {
+        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromRegistrationId(activityId);
         System.out.println("userList : "+userList);
         List<RegistrantDetailsDTO> registrantList = registrantsDetailsMapperService.mapToRegistrantsDetailsDTO(userList);
-        return registrantList;
-    }
+        return registrantList.stream()
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "There is no registration id :" + activityId));    }
 
     public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);

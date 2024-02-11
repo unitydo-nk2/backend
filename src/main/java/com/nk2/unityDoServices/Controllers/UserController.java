@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @GetMapping("/registration/{id}")
-    public List<RegistrantDetailsDTO> getActivityRegistrants(@PathVariable Integer id) {
+    public RegistrantDetailsDTO getActivityRegistrants(@PathVariable Integer id) {
         return userServices.getRegistrantDetails(id);
     }
 
