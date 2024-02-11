@@ -1,8 +1,6 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.ActivityWithStatusDTO;
-import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
-import com.nk2.unityDoServices.DTOs.UserDTO;
+import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.ActivityServices;
@@ -36,6 +34,11 @@ public class UserController {
     @GetMapping("/{id}/activities")
     public List<ActivityWithStatusDTO> getRegisteredActivity(@PathVariable Integer id) {
         return activityServices.getRegisteredActivity(id);
+    }
+
+    @GetMapping("/registration/{id}")
+    public List<RegistrantDetailsDTO> getActivityRegistrants(@PathVariable Integer id) {
+        return userServices.getRegistrantDetails(id);
     }
 
     @DeleteMapping("/{id}")

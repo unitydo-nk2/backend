@@ -22,7 +22,6 @@ public class UserMapperService {
     }
 
     private RegistrantDTO mapToRegistrantDTO(Object[] result) {
-
         RegistrantDTO dto = new RegistrantDTO();
         dto.setUserId(((Number) result[0]).intValue());
         dto.setUsername((String) result[1]);

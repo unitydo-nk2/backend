@@ -14,12 +14,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ActivityMapperService {
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private LocationRepository locationRepository;
-
     public List<ActivityWithUserCountDTO> mapToActivityWithUserCountDTO(List<Object[]> resultList) {
         return resultList.stream()
                 .map(this::mapToObjectForActivityWithUserCount)

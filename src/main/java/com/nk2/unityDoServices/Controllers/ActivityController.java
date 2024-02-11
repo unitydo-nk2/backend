@@ -69,8 +69,14 @@ public class ActivityController {
         return activityServices.registerActivity(user,activityId);
     }
 
+
+//    @GetMapping("/{activityId}/registrants")
+//    public List<RegistrantDTO> getActivityRegistrants(@PathVariable Integer activityId) {
+//        return userServices.getUserRegisteredActivity(activityId);
+//    }
+
     @GetMapping("/{activityId}/registrants")
-    public List<RegistrantDTO> getActivityRegistrants(@PathVariable Integer activityId) {
+    public List<Object[]> getActivityRegistrants(@PathVariable Integer activityId) {
         return userServices.getUserRegisteredActivity(activityId);
     }
 

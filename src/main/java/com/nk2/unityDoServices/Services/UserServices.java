@@ -2,6 +2,7 @@ package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
 import com.nk2.unityDoServices.DTOs.RegistrantDTO;
+import com.nk2.unityDoServices.DTOs.RegistrantDetailsDTO;
 import com.nk2.unityDoServices.DTOs.UserDTO;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
@@ -33,6 +34,9 @@ public class UserServices {
 
     @Autowired
     private UserMapperService userMapperService;
+
+    @Autowired
+    private RegistrantsDetailsMapperService registrantsDetailsMapperService;
 
     public User save(CreateNewUserDTO user) {
         User isUser = userRepository.findUserbyUserName(user.getUsername());
@@ -72,17 +76,24 @@ public class UserServices {
         return listMapper.mapList(userList, UserDTO.class, modelMapper);
     }
 
-    public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
+    public List<RegistrantDetailsDTO> getRegistrantDetails(Integer activityId) {
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
-//        System.out.println("userList : "+userList);
-        List<RegistrantDTO> registrantList = userMapperService.mapToRegistrantDTO(userList);
+        System.out.println("userList : "+userList);
+        List<RegistrantDetailsDTO> registrantList = registrantsDetailsMapperService.mapToRegistrantsDetailsDTO(userList);
         return registrantList;
     }
 
-//    public List<Object[]> getUserRegisteredActivity(Integer activityId) {
+//    public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
 //        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
-//        return userList;
+//        System.out.println("userList : "+userList);
+//        List<RegistrantDTO> registrantList = userMapperService.mapToRegistrantDTO(userList);
+//        return registrantList;
 //    }
+
+    public List<Object[]> getUserRegisteredActivity(Integer activityId) {
+        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
+        return userList;
+    }
 
     public UserDTO getUserById(Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
