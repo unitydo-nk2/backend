@@ -23,6 +23,7 @@ public class ActivityListDTO {
     private String mainCategory;
     private Instant activityDate;
     private Instant activityEndDate;
+    private String imagePath;
 
     public ActivityListDTO(Activity activity) {
         this.id = activity.getId();
@@ -35,5 +36,6 @@ public class ActivityListDTO {
         this.mainCategory = activity.getCategoryId().getMainCategory().getMainCategory();
         this.activityDate = activity.getActivityDate();
         this.activityEndDate = activity.getActivityEndDate();
+
     }
 }

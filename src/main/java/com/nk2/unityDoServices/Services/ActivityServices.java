@@ -68,6 +68,12 @@ public class ActivityServices {
 
         for (Activity activity : activityList) {
             ActivityListDTO dto = new ActivityListDTO(activity);
+            List<Image> img = imageRepository.getImagePosterbyActivityId(dto.getId());
+            if(img.isEmpty()){
+                dto.setImagePath(null);
+            }else{
+                dto.setImagePath(img.get(0).getImagepath());
+            }
             activityListDTOs.add(dto);
         }
 

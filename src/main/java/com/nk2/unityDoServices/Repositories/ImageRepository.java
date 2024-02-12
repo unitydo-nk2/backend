@@ -16,4 +16,11 @@ public interface ImageRepository extends JpaRepository<Image,Integer> {
     @Query(value = "SELECT i.* FROM image i " +
             "WHERE i.activityId = :activityId ",nativeQuery = true)
     List<Image> getImageListbyActivityId(Integer activityId);
+
+    @Query(value = "SELECT i.* FROM image i " +
+            "WHERE i.activityId = :activityId " +
+            "AND i.label = 'poster'"
+            ,nativeQuery = true)
+    List<Image> getImagePosterbyActivityId(Integer activityId);
+
 }
