@@ -9,12 +9,16 @@ import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Repositories.RegistrationRepository;
 import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Utils.ListMapper;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -38,38 +42,73 @@ public class UserServices {
     @Autowired
     private RegistrantsDetailsMapperService registrantsDetailsMapperService;
 
-    public User save(CreateNewUserDTO user) {
-        User isUser = userRepository.findUserbyUserName(user.getUsername());
-        if (isUser == null) {
-            System.out.println("create new user");
-            User newUser = modelMapper.map(user, User.class);
-            newUser.setName(user.getName());
-            newUser.setUsername(user.getUsername());
-            newUser.setPassword(user.getPassword());
-            newUser.setSurName(user.getSurName());
-            newUser.setNickName(user.getNickName());
-            newUser.setEmail(user.getEmail());
-            newUser.setGender(user.getGender());
-            newUser.setDateOfBirth(user.getDateOfBirth());
-            newUser.setReligion(user.getReligion());
-            newUser.setTelephoneNumber(user.getTelephoneNumber());
-            newUser.setAddress(user.getAddress());
-            newUser.setRole(user.getRole());
-            newUser.setEmergencyPhoneNumber(user.getEmergencyPhoneNumber());
-            newUser.setProfileImg(user.getProfileImg());
-            newUser.setLine(user.getLine());
-            newUser.setInstagram(user.getInstagram());
-            newUser.setX(user.getX());
-            newUser.setCreateTime(user.getCreateTime());
-            newUser.setUpdateTime(user.getUpdateTime());
-            userRepository.save(newUser);
-            System.out.println("created user : " + newUser.getUsername());
-            return modelMapper.map(newUser, User.class);
-        } else {
-            System.out.println("Username used in ID : " + isUser.getId());
-            return isUser;
+    public User save(@Valid CreateNewUserDTO user) {
+        if(user.getRole()==null){
+            user.setRole("student");}
+        Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
+        char[] password = user.getPassword().toCharArray();
+        User newUser = modelMapper.map(user, User.class);
+        newUser.setName(user.getName());
+        newUser.setUsername(user.getEmail().trim());
+        newUser.setSurName(user.getSurName());
+        newUser.setNickName(user.getNickName());
+        newUser.setEmail(user.getEmail());
+        newUser.setGender(user.getGender());
+        newUser.setDateOfBirth(user.getDateOfBirth());
+        newUser.setReligion(user.getReligion());
+        newUser.setTelephoneNumber(user.getTelephoneNumber());
+        newUser.setAddress(user.getAddress());
+        newUser.setRole(user.getRole());
+        newUser.setEmergencyPhoneNumber(user.getEmergencyPhoneNumber());
+        newUser.setProfileImg(user.getProfileImg());
+        newUser.setLine(user.getLine());
+        newUser.setInstagram(user.getInstagram());
+        newUser.setX(user.getX());
+        newUser.setCreateTime(Instant.now());
+        newUser.setUpdateTime(Instant.now());
+        try {
+            String hash = argon2.hash(2, 16, 1, password);
+            newUser.setPassword(hash);
+        } finally {
+            argon2.wipeArray(password);
         }
+        newUser.setEmail(user.getEmail().trim());
+        userRepository.saveAndFlush(newUser);
+        return modelMapper.map(newUser, User.class);
     }
+
+//    public User save(CreateNewUserDTO user) {
+//        User isUser = userRepository.findUserbyUserName(user.getUsername());
+//        if (isUser == null) {
+//            System.out.println("create new user");
+//            User newUser = modelMapper.map(user, User.class);
+//            newUser.setName(user.getName());
+//            newUser.setUsername(user.getUsername());
+//            newUser.setPassword(user.getPassword());
+//            newUser.setSurName(user.getSurName());
+//            newUser.setNickName(user.getNickName());
+//            newUser.setEmail(user.getEmail());
+//            newUser.setGender(user.getGender());
+//            newUser.setDateOfBirth(user.getDateOfBirth());
+//            newUser.setReligion(user.getReligion());
+//            newUser.setTelephoneNumber(user.getTelephoneNumber());
+//            newUser.setAddress(user.getAddress());
+//            newUser.setRole(user.getRole());
+//            newUser.setEmergencyPhoneNumber(user.getEmergencyPhoneNumber());
+//            newUser.setProfileImg(user.getProfileImg());
+//            newUser.setLine(user.getLine());
+//            newUser.setInstagram(user.getInstagram());
+//            newUser.setX(user.getX());
+//            newUser.setCreateTime(user.getCreateTime());
+//            newUser.setUpdateTime(user.getUpdateTime());
+//            userRepository.save(newUser);
+//            System.out.println("created user : " + newUser.getUsername());
+//            return modelMapper.map(newUser, User.class);
+//        } else {
+//            System.out.println("Username used in ID : " + isUser.getId());
+//            return isUser;
+//        }
+//    }
 
     public List<UserDTO> getUserList() {
         List<User> userList = userRepository.findAll();

@@ -50,9 +50,7 @@ public class CreateNewUserDTO {
     private String line;
     private String instagram;
     private String x;
-    @NotBlank(message = "createTime is required")
     private Instant createTime;
-    @NotBlank(message = "updateTime is required")
     private Instant updateTime;
 }
 

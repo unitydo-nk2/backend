@@ -4,8 +4,10 @@ import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.ActivityServices;
+import com.nk2.unityDoServices.Services.MatchServices;
 import com.nk2.unityDoServices.Services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,6 +22,14 @@ public class UserController {
 
     @Autowired
     private ActivityServices activityServices;
+
+    @Autowired
+    private MatchServices matchServices;
+
+    @PostMapping("/match")
+    public ResponseEntity login(@Valid @RequestBody UserLoginDTO userLogin) {
+        return matchServices.matchCheck(userLogin);
+    }
 
     @GetMapping("/list")
     public List<UserDTO> getActivityList() {
