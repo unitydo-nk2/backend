@@ -6,11 +6,13 @@ import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.ActivityServices;
 import com.nk2.unityDoServices.Services.MatchServices;
 import com.nk2.unityDoServices.Services.UserServices;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -27,8 +29,10 @@ public class UserController {
     private MatchServices matchServices;
 
     @PostMapping("/match")
-    public ResponseEntity login(@Valid @RequestBody UserLoginDTO userLogin) {
-        return matchServices.matchCheck(userLogin);
+    public ResponseEntity login(@Valid @RequestBody UserLoginDTO userLogin,
+                                HttpServletResponse httpServletResponse,
+                                ServletWebRequest request) throws Exception {
+        return matchServices.login(userLogin,httpServletResponse,request);
     }
 
     @GetMapping("/list")

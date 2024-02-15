@@ -1,9 +1,6 @@
 package com.nk2.unityDoServices.Services;
 
-import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
-import com.nk2.unityDoServices.DTOs.RegistrantDTO;
-import com.nk2.unityDoServices.DTOs.RegistrantDetailsDTO;
-import com.nk2.unityDoServices.DTOs.UserDTO;
+import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Repositories.RegistrationRepository;
@@ -11,18 +8,25 @@ import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Utils.ListMapper;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.time.Instant;
 import java.util.List;
 
 @Service
-public class UserServices {
+@Slf4j
+@RequiredArgsConstructor
+public class UserServices{
 
     @Autowired
     private UserRepository userRepository;
@@ -37,14 +41,38 @@ public class UserServices {
     private RegistrationRepository registrationRepository;
 
     @Autowired
-    private UserMapperService userMapperService;
+    private UserMapperServices userMapperServices;
 
     @Autowired
-    private RegistrantsDetailsMapperService registrantsDetailsMapperService;
+    private RegistrantsDetailsMapperServices registrantsDetailsMapperServices;
+
+    public User findUserByEmail(String email) {
+        return userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "user "+ email + " does not exist !!!"));
+    }
+
+    public UserDetailsDTO getUserDetailByEmail(String email) {
+        return mapUserBuild(userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "user "+ email + " does not exist !!!")));
+    }
+
+    public UserDetailsDTO mapUserBuild(User user) {
+        try {
+            UserDetailsDTO userResponse = new UserDetailsDTO();
+            userResponse.setId(user.getId().longValue());
+            userResponse.setUsername(user.getName());
+            userResponse.setEmail(user.getEmail());
+            userResponse.setAuthorities(user.getRole());
+            return userResponse;
+        } catch (Exception e) {
+            log.error("Could not Map User to UserResponse: " + e.getMessage());
+            return UserDetailsDTO.builder().build();
+        }
+    }
 
     public User save(@Valid CreateNewUserDTO user) {
         if(user.getRole()==null){
-            user.setRole("student");}
+            user.setRole("user");}
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
         char[] password = user.getPassword().toCharArray();
         User newUser = modelMapper.map(user, User.class);
@@ -77,39 +105,6 @@ public class UserServices {
         return modelMapper.map(newUser, User.class);
     }
 
-//    public User save(CreateNewUserDTO user) {
-//        User isUser = userRepository.findUserbyUserName(user.getUsername());
-//        if (isUser == null) {
-//            System.out.println("create new user");
-//            User newUser = modelMapper.map(user, User.class);
-//            newUser.setName(user.getName());
-//            newUser.setUsername(user.getUsername());
-//            newUser.setPassword(user.getPassword());
-//            newUser.setSurName(user.getSurName());
-//            newUser.setNickName(user.getNickName());
-//            newUser.setEmail(user.getEmail());
-//            newUser.setGender(user.getGender());
-//            newUser.setDateOfBirth(user.getDateOfBirth());
-//            newUser.setReligion(user.getReligion());
-//            newUser.setTelephoneNumber(user.getTelephoneNumber());
-//            newUser.setAddress(user.getAddress());
-//            newUser.setRole(user.getRole());
-//            newUser.setEmergencyPhoneNumber(user.getEmergencyPhoneNumber());
-//            newUser.setProfileImg(user.getProfileImg());
-//            newUser.setLine(user.getLine());
-//            newUser.setInstagram(user.getInstagram());
-//            newUser.setX(user.getX());
-//            newUser.setCreateTime(user.getCreateTime());
-//            newUser.setUpdateTime(user.getUpdateTime());
-//            userRepository.save(newUser);
-//            System.out.println("created user : " + newUser.getUsername());
-//            return modelMapper.map(newUser, User.class);
-//        } else {
-//            System.out.println("Username used in ID : " + isUser.getId());
-//            return isUser;
-//        }
-//    }
-
     public List<UserDTO> getUserList() {
         List<User> userList = userRepository.findAll();
         return listMapper.mapList(userList, UserDTO.class, modelMapper);
@@ -118,7 +113,7 @@ public class UserServices {
     public RegistrantDetailsDTO getRegistrantDetails(Integer activityId) {
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromRegistrationId(activityId);
         System.out.println("userList : "+userList);
-        List<RegistrantDetailsDTO> registrantList = registrantsDetailsMapperService.mapToRegistrantsDetailsDTO(userList);
+        List<RegistrantDetailsDTO> registrantList = registrantsDetailsMapperServices.mapToRegistrantsDetailsDTO(userList);
         return registrantList.stream()
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -127,7 +122,7 @@ public class UserServices {
     public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
         System.out.println("userList : "+userList);
-        List<RegistrantDTO> registrantList = userMapperService.mapToRegistrantDTO(userList);
+        List<RegistrantDTO> registrantList = userMapperServices.mapToRegistrantDTO(userList);
         return registrantList;
     }
 
@@ -183,4 +178,5 @@ public class UserServices {
         registrationRepository.saveAndFlush(registration);
         return registration;
     }
+
 }

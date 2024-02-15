@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class RegistrantsDetailsMapperService {
+public class RegistrantsDetailsMapperServices {
     public List<RegistrantDetailsDTO> mapToRegistrantsDetailsDTO(List<Object[]> resultList) {
         return resultList.stream()
                 .map(this::mapToRegistrantsDetailsDTO)

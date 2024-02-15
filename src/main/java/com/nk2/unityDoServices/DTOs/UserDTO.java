@@ -1,8 +1,6 @@
 package com.nk2.unityDoServices.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.nk2.unityDoServices.Enums.Role;
-import com.nk2.unityDoServices.Validators.EnumValidator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,11 +8,6 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDate;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 @Getter
 @Setter

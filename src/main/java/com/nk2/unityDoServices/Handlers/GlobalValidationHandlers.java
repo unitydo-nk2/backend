@@ -19,6 +19,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalValidationHandlers extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
     ) {
@@ -35,4 +36,5 @@ public class GlobalValidationHandlers extends ResponseEntityExceptionHandler {
             errorFields.put(error.getObjectName(),error.getDefaultMessage());}
         errors.put("fields", errorFields);
         return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST);
-    }}
+    }
+}
