@@ -4,6 +4,7 @@ import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Services.UserServices;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -21,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
+
 
 @Service
 public class JwtService {
