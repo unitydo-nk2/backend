@@ -1,7 +1,7 @@
 package com.nk2.unityDoServices.Entities;
 
 import com.nk2.unityDoServices.Enums.RegistrationStatus;
-import com.nk2.unityDoServices.Validators.EnumValidator;
+import com.nk2.unityDoServices.Validators.Validators.EnumValidator;
 import jakarta.persistence.*;
 
 import java.time.Instant;

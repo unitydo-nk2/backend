@@ -1,18 +1,20 @@
 package com.nk2.unityDoServices.Services;
 
+import com.nk2.unityDoServices.Configs.JwtAuthenticationFilter;
+import com.nk2.unityDoServices.Configs.JwtService;
 import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.*;
 import com.nk2.unityDoServices.Repositories.*;
+import com.nk2.unityDoServices.Services.Mappers.ActivityMapperService;
 import com.nk2.unityDoServices.Utils.ListMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.SQLOutput;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -58,6 +60,12 @@ public class ActivityServices {
     @Autowired
     private RegistrationRepository registrationRepository;
 
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private JwtService jwtService;
+
     //    public List<ActivityListDTO> getActivityList() {
 //        List<Activity> activityList = repository.findAll();
 //        return listMapper.mapList(activityList, ActivityListDTO.class, modelMapper);
@@ -69,9 +77,9 @@ public class ActivityServices {
         for (Activity activity : activityList) {
             ActivityListDTO dto = new ActivityListDTO(activity);
             List<Image> img = imageRepository.getImagePosterbyActivityId(dto.getId());
-            if(img.isEmpty()){
+            if (img.isEmpty()) {
                 dto.setImagePath(null);
-            }else{
+            } else {
                 dto.setImagePath(img.get(0).getImagepath());
             }
             activityListDTOs.add(dto);
@@ -109,15 +117,25 @@ public class ActivityServices {
     }
 
     public Instant convertDateTimeInstant(String dateTimeLocalString) {
-        System.out.println("dateTimeLocalString = "+dateTimeLocalString);
+        System.out.println("dateTimeLocalString = " + dateTimeLocalString);
         LocalDateTime localDateTime = LocalDateTime.parse(dateTimeLocalString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
         ZoneId zoneId = ZoneId.of("UTC");
         Instant instant = localDateTime.atZone(zoneId).toInstant();
-        System.out.println("toInstant = "+instant);
+        System.out.println("toInstant = " + instant);
         return instant;
     }
 
-    public ActivityDTO update(Integer id, UpdateActivityDTO updateActivity, LocationDTO updateLocation) {
+
+
+    public ActivityDTO update(HttpServletRequest httpServletRequest, Integer id, UpdateActivityDTO updateActivity, LocationDTO updateLocation) {
+        if(httpServletRequest.isUserInRole("User")){
+            String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+            User targetUser = userServices.findUserByEmail(email);
+            if(targetUser.getId() != id){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this user is not belongs to you !");
+            }
+        }
         Location location = locationServices.save(updateLocation);
         Activity editActivity = repository.findById(id).map(activity -> {
             activity.setActivityName(updateActivity.getActivityName());
@@ -140,36 +158,11 @@ public class ActivityServices {
         return new ActivityDTO(editActivity);
     }
 
-    public ActivityDTO save(CreateNewActivityDTO activity, LocationDTO location, String userName) {
-        System.out.println("userName " + userName);
+    public ActivityDTO save(CreateNewActivityDTO activity, LocationDTO location) {
+
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User activityOwner = userServices.findUserByEmail(email);
         Activity newActivity = new Activity();
-        User userFromUserName = userRepository.findUserbyUserName(userName);
-        User activityOwner = new User();
-        if (userFromUserName == null) {
-            activityOwner.setUsername(userName);
-            activityOwner.setName(userName + "_Name");
-            activityOwner.setPassword(userName + "_Password");
-            activityOwner.setSurName(userName + "_SurName");
-            activityOwner.setNickName(userName + "_nickName");
-            activityOwner.setEmail(userName + "@email.com");
-            activityOwner.setGender("male");
-            activityOwner.setDateOfBirth(LocalDate.now());
-            activityOwner.setReligion("Buddhism");
-            activityOwner.setTelephoneNumber("0123456789");
-            activityOwner.setAddress(userName + " Address");
-            activityOwner.setRole("ActivityOwner");
-            activityOwner.setEmergencyPhoneNumber("9876543210");
-            activityOwner.setProfileImg(userName + "profile_image_link");
-            activityOwner.setLine(userName + "_lineId");
-            activityOwner.setInstagram(userName + "_instagram");
-            activityOwner.setX(userName + "_xAccount");
-            activityOwner.setCreateTime(Instant.now());
-            activityOwner.setUpdateTime(Instant.now());
-            CreateNewUserDTO userDTO = modelMapper.map(activityOwner, CreateNewUserDTO.class);
-            activityOwner = userServices.save(userDTO);
-        } else {
-            activityOwner = userFromUserName;
-        }
         System.out.println("getAmount  : " + activity.getAmount());
 //        User activityOwner = userRepository.findById(activity.getUserId()) .orElseThrow(() -> new ResponseStatusException(
 //                HttpStatus.NOT_FOUND, "Event id " + activity.getCategoryId() + " Does Not Exist !!!"));
@@ -196,43 +189,41 @@ public class ActivityServices {
         newActivity.setCreateTime(Instant.now());
         newActivity.setActivityEndDate(convertDateTimeInstant(activity.getActivityEndDate()));
         newActivity.setActivityStatus("Active");
-        System.out.println(activity.getActivityDate() + " new activity getActivityDate "+ newActivity.getActivityDate());
-        System.out.println(activity.getActivityEndDate() + " new activity getActivityEndDate "+ newActivity.getActivityEndDate());
-        System.out.println(activity.getRegisterStartDate() + " new activity getRegisterStartDate "+ newActivity.getRegisterStartDate());
-        System.out.println(activity.getRegisterEndDate() + " new activity getRegisterEndDate "+ newActivity.getRegisterEndDate());
-        System.out.println(activity.getAnnouncementDate() + " new activity getAnnouncementDate "+ newActivity.getAnnouncementDate());
+        System.out.println(activity.getActivityDate() + " new activity getActivityDate " + newActivity.getActivityDate());
+        System.out.println(activity.getActivityEndDate() + " new activity getActivityEndDate " + newActivity.getActivityEndDate());
+        System.out.println(activity.getRegisterStartDate() + " new activity getRegisterStartDate " + newActivity.getRegisterStartDate());
+        System.out.println(activity.getRegisterEndDate() + " new activity getRegisterEndDate " + newActivity.getRegisterEndDate());
+        System.out.println(activity.getAnnouncementDate() + " new activity getAnnouncementDate " + newActivity.getAnnouncementDate());
         repository.saveAndFlush(newActivity);
         return new ActivityDTO(newActivity);
     }
 
-    public Integer delete(Integer id) {
+    public Integer delete(HttpServletRequest httpServletRequest, Integer id) {
+        if(httpServletRequest.isUserInRole("ActivityOwner")){
+            User targetUser = userRepository.findActivityOwner(id);
+            if(targetUser.getId() != id){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this user is not belongs to you !");
+            }
+        }
         Activity activity = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
         repository.deleteById(id);
         return id;
     }
 
-    //    public Registration registerActivity(ActivityRegisterDTO activityRegistration) {
-////        Registration registration = modelMapper.map(activityRegistration, Registration.class);
-//        Registration registration = new Registration();
-//        Activity activity = activityRepository.findById(activityRegistration.getActivityId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-//                "Activity ID " + activityRegistration.getActivityId() + " does not exist !!!"));
-//        User user = userRepository.findById(activityRegistration.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-//                "User ID " + activityRegistration.getActivityId() + " does not exist !!!"));
-//        registration.setRegistrationDate(activityRegistration.getRegistrationDate());
-//        registration.setActivityId(activity);
-//        registration.setUserId(user);
-//        registration.setStatus("s");
-//        return registrationRepository.saveAndFlush(registration) ;
-//    }
 
-    public Registration registerActivity(UserRegistrationDTO user, Integer activityId) {
-        CreateNewUserDTO userAsDTO = modelMapper.map(user, CreateNewUserDTO.class);
-        userAsDTO.setRole("User");
-        userAsDTO.setCreateTime(Instant.now());
-        userAsDTO.setUpdateTime(Instant.now());
-
-        User newUser = userServices.save(userAsDTO);
+    public Registration registerActivity(HttpServletRequest httpServletRequest, UserRegistrationDTO user, Integer activityId) {
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        if (httpServletRequest.isUserInRole("User")) {
+            if (email.compareTo(user.getEmail()) != 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The booking email must be the same as the student's email");
+            }
+        } else if (httpServletRequest.isUserInRole("Admin") || httpServletRequest.isUserInRole("ActivityOwner")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only user can create event");
+        }
         Registration registration = new Registration();
         Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Activity ID " + activityId + " does not exist !!!"));
@@ -240,7 +231,7 @@ public class ActivityServices {
 //                "User ID " + activityRegistration.getActivityId() + " does not exist !!!"));
         registration.setRegistrationDate(Instant.now());
         registration.setActivityId(activity);
-        registration.setUserId(newUser);
+        registration.setUserId(userServices.findUserByEmail(email));
         registration.setStatus("registered");
         return registrationRepository.saveAndFlush(registration);
     }
@@ -257,18 +248,12 @@ public class ActivityServices {
         return registrations;
     }
 
-    public List<ActivityWithStatusDTO> getRegisteredActivity(Integer id) {
-        List<Object[]> activitiesQuery = repository.FindActivityRegisteredByUserId(id);
-        List<ActivityWithStatusDTO> activityList = activityMapperService.mapToActivityWithUserStatusDTO(activitiesQuery);
-        return activityList;
-    }
-
     public List<ActivityWithStatusDTO> getActivityByStatusAndUserId(Integer id, String status) {
         List<ActivityWithStatusDTO> activities = repository.FindActivityByStatusAndUserId(id, status);
         return activities;
     }
 
-    public CommonActivityDTO getCommonActivityInfoByID(Integer activityId) {
+    public CommonActivityDTO getActivityDetailForRegistrationPage(Integer activityId) {
         Activity activity = repository.findById(activityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
         return new CommonActivityDTO(activity);

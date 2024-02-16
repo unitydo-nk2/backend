@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,27 +38,52 @@ import java.util.Map;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfiguration {
-    private static final String[] FREE_AREA = {
-            "/api/activities/list",
-            "/api/users/match",
-            "/api/v1/auth/**",
-            "/api/v1/details"
+
+    private static final String[] GUEST_PATH_AVAILABLE = {
+            "/api/auth/**"
     };
-    private static final String[] ACCOUNT_WHITELIST = {
-            "/api/v1/auth/details",
-            "/api/v1/auth/credentials",
-            "/api/v1/auth/password",
-            "/api/v1/auth/email",
-            "/api/v1/auth/username",
-            "/api/v1/auth/forget-password",
-            "/api/v1/auth/refresh",
+
+    private static final String[] GUEST_GET_AVAILABLE = {
+            "/api/activities/list","/api/activities/poster","/api/activities/popular",
+            "/api/activities/{activityId}","/api/activities/{activityId}/images","/api/categories/**"
     };
-    private static final String[] ADMIN_WHITELIST = {
-            "/api/v1/admin/**"
+
+    private static final String[] ADMIN_PATH_AVAILABLE = {
+            "/api/categories/**",
+            "/api/users/list","/api/users/{userId}", "/api/users/{id}/activities","/api/users/registration/{id}",
+            "/api/activities/list","/api/activities/userRegistration","/api/activities/{activityId}"
+            ,"/api/activities/{activityId}/images"
+            ,"/api/activities/registration/{activityId}"
+            ,"/api/activities/{activityId}/images"
+            ,"/api/activities/{activityId}/registration"//get
+            ,"/api/activities"
+            ,"/api/activities/images" ,"/api/activities/images" ,"/api/activities/images/{id}"
     };
-    private static final String[] USER_WHITELIST = {
-            "/api/v1/user/**"
+
+    private static final String[] USER_PATH_AVAILABLE = {
+            "/api/categories/**",
+            "/api/users/list","/api/users/{userId}","/api/users/{id}/activities",
+            "/api/activities/list","/api/activities/userRegistration",
+            "/api/activities/{activityId}", // get
+            "/api/activities/{activityId}/images"
+            ,"/api/activities/{activityId}/images"
+            ,"/api/activities/{activityId}/registration" //post
+            ,"/api/activities/images/{id}"
     };
+
+    private static final String[] ACTIVITY_OWNER_PATH_AVAILABLE = {
+            "/api/categories/**",
+            "/api/users/list","/api/users/{userId}","/api/users/registration/{id}",
+            "/api/activities/list","/api/activities/userRegistration","/api/activities/userRegistration",
+            "/api/activities/{activityId}", // get , delete
+            "/api/{activityId}/images"
+            ,"/api/activities/{activityId}/images"
+            ,"/api/activities/registration/{activityId}"
+            ,"/api/activities/{activityId}/registration" //get
+            ,"/api/activities/images/{id}"
+    };
+
+
     final JwtEntryPoint jwtEntryPoint;
     final JwtAuthenticationFilter jwtFilter;
     final UserServices userService;
@@ -82,13 +108,17 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(FREE_AREA).permitAll()
-                        .requestMatchers(ACCOUNT_WHITELIST).hasAnyAuthority(
-                                Role.Admin.name(),
-                                Role.User.name()
-                        )
-                        .requestMatchers(ADMIN_WHITELIST).hasAuthority(Role.Admin.name())
-                        .requestMatchers(USER_WHITELIST).hasAnyAuthority(Role.User.name())
+                        .requestMatchers(GUEST_PATH_AVAILABLE).permitAll()
+                        .requestMatchers(HttpMethod.GET,GUEST_GET_AVAILABLE).permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/activities/userRegistration","/api/activities/registration/{activityId}"
+                                ,"api/users/{id}/activities","api/users/registration/{id}","api/users/{activityId}/registrants").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.POST,"/api/activities","/api/activities/images","api/activities/{activityId}/registration").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.DELETE,"/api/activities/{id}","api/users/{id}").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/activities/{id}","/api/activities/images/{id}","api/users/registration/{id}").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/users/{id}").hasAnyRole(Role.Admin.name(),Role.User.name())
+                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAnyAuthority(Role.Admin.name())
+                        .requestMatchers(HttpMethod.GET,"api/activities/recommends").hasAuthority(Role.User.name())
                         .anyRequest().authenticated()
                 );
         http.authenticationProvider(authenticationProvider());

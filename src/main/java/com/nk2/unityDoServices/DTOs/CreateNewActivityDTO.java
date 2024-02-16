@@ -2,7 +2,7 @@ package com.nk2.unityDoServices.DTOs;
 
 import com.nk2.unityDoServices.Enums.ActivityFormat;
 import com.nk2.unityDoServices.Enums.ActivityStatus;
-import com.nk2.unityDoServices.Validators.*;
+import com.nk2.unityDoServices.Validators.Validators.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -4,14 +4,12 @@ import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.ActivityServices;
-import com.nk2.unityDoServices.Services.MatchServices;
+import com.nk2.unityDoServices.Services.AuthenticationServices;
 import com.nk2.unityDoServices.Services.UserServices;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.ServletWebRequest;
 
 import java.util.List;
 
@@ -26,54 +24,46 @@ public class UserController {
     private ActivityServices activityServices;
 
     @Autowired
-    private MatchServices matchServices;
-
-    @PostMapping("/match")
-    public ResponseEntity login(@Valid @RequestBody UserLoginDTO userLogin,
-                                HttpServletResponse httpServletResponse,
-                                ServletWebRequest request) throws Exception {
-        return matchServices.login(userLogin,httpServletResponse,request);
-    }
+    private AuthenticationServices authenticationServices;
 
     @GetMapping("/list")
-    public List<UserDTO> getActivityList() {
-        return userServices.getUserList();
+    public List<UserDTO> getUserList(HttpServletRequest httpServletRequest) {
+        return userServices.getUserList(httpServletRequest);
     }
 
     @GetMapping("/{userId}")
-    public UserDTO getActivityDetailsById(@PathVariable Integer userId) {
+    public UserDTO getUserDetailsById(@PathVariable Integer userId) {
         return userServices.getUserById(userId);
     }
 
     @GetMapping("/{id}/activities")
-    public List<ActivityWithStatusDTO> getRegisteredActivity(@PathVariable Integer id) {
-        return activityServices.getRegisteredActivity(id);
+    public List<ActivityWithStatusDTO> getRegisteredActivity(HttpServletRequest httpServletRequest,
+                                                             @PathVariable Integer id) {
+        return userServices.getRegisteredActivity(httpServletRequest,id);
     }
 
     @GetMapping("/registration/{id}")
-    public RegistrantDetailsDTO getActivityRegistrants(@PathVariable Integer id) {
+    public RegistrantDetailsDTO getActivityRegistrants(
+            @PathVariable Integer id) {
         return userServices.getRegistrantDetails(id);
     }
 
     @DeleteMapping("/{id}")
-    public Integer deleteUser(@PathVariable Integer id) {
-        return userServices.delete(id);
-    }
-
-    @PostMapping("")
-    public User createNewUser(@RequestPart("user") CreateNewUserDTO user) {
-        return userServices.save(user);
+    public Integer deleteUser(HttpServletRequest httpServletRequest,@PathVariable Integer id) {
+        return userServices.delete(httpServletRequest, id);
     }
 
     @PatchMapping("/registration/{id}")
-    public Registration updateUserRegistration(@Valid @RequestPart("status") String status
+    public Registration updateUserRegistration(HttpServletRequest httpServletRequest,
+                                               @Valid @RequestPart("status") String status
             , @PathVariable Integer id) {
-        return userServices.updateRegistration(id, status);
+        return userServices.updateRegistration(httpServletRequest,id, status);
     }
 
     @PatchMapping("/{id}")
-    public User updateUser(@Valid @RequestPart("updateUser") UserDTO updateUser
+    public User updateUser(HttpServletRequest httpServletRequest,
+                           @Valid @RequestPart("updateUser") UserDTO updateUser
             , @PathVariable Integer id) {
-        return userServices.update(id, updateUser);
+        return userServices.update(httpServletRequest,id, updateUser);
     }
 }

@@ -1,7 +1,7 @@
 package com.nk2.unityDoServices.Configs;
 
 import com.nk2.unityDoServices.Entities.User;
-import com.nk2.unityDoServices.Services.UserServices;
+import com.nk2.unityDoServices.Repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,21 +9,32 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    final JwtService jwtTokenUtil;
-    final UserServices userService;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Setter
+    @Getter
+    String jwtToken;
+
+    final JwtService jwtService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,14 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("token: " + token);
             if (token.startsWith("Bearer ")) {
                 token = token.substring(7);
+                setJwtToken(token);
             }
             try {
-                String username = jwtTokenUtil.extractUsername(token);
-                User user = userService.findUserByEmail(username);
-                if (user != null && jwtTokenUtil.isTokenValid(token, user)) {
+                String username = jwtService.extractUsername(token);
+                User user = userRepository.findByEmail(jwtService.getUsernameFromToken(token)).orElseThrow((() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No user with email")));
+                if (user != null && jwtService.isTokenValid(token, user)) {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null, user.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    log.info("user {} perform some action", username);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Token is invalid");

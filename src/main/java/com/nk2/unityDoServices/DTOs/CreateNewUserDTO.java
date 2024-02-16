@@ -1,7 +1,7 @@
 package com.nk2.unityDoServices.DTOs;
 
 import com.nk2.unityDoServices.Enums.Role;
-import com.nk2.unityDoServices.Validators.EnumValidator;
+import com.nk2.unityDoServices.Validators.Validators.EnumValidator;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;

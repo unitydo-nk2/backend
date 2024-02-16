@@ -1,6 +1,7 @@
 package com.nk2.unityDoServices.Configs;
 
 import com.nk2.unityDoServices.Entities.User;
+import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Services.UserServices;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,9 +11,11 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
@@ -23,7 +26,7 @@ import java.util.function.Function;
 public class JwtService {
 
     @Autowired
-    UserServices userServices;
+    UserRepository userRepository;
 
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
@@ -37,7 +40,6 @@ public class JwtService {
     static final String ROLE_KEY = "role";
     static final String NAME_KEY = "name";
     static final String ID_KEY = "id";
-
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -56,17 +58,16 @@ public class JwtService {
         claims.put(NAME_KEY, user.getName() +" "+ user.getSurName());
         claims.put(CREATED_DATE_KEY, new Date());
 
-//        Date expirationDate = generateExpirationDate(jwtExpiration);
         String token = generateToken(claims, jwtExpiration);
         return token;
     }
 
-//    public String refreshJWT(String token) {
+    public String generateRefreshToken(String token) {
 //        Date expirationDate = generateExpirationDate(jwtExpiration);
-//        Claims claims = getClaimsFromToken(token);
-//        claims.put(CREATED_DATE_KEY, new Date());
-//        return generateToken(claims, expirationDate);
-//    }
+        Claims claims = getClaimsFromToken(token);
+        claims.put(CREATED_DATE_KEY, new Date());
+        return generateToken(claims, refreshExpiration);
+    }
 
     public String generateToken(Map<String, Object> claims, Long expiratioDate) {
 //        final Key key = new SecretKeySpec(SECRET.getBytes(), SignatureAlgorithm.HS512.getJcaName());
@@ -87,28 +88,17 @@ public class JwtService {
                 .getBody();
     }
 
-    public Date generateExpirationDate(Long expiration) {
-        return new Date(System.currentTimeMillis() + expiration * 1000);
-    }
-
     public String getUsernameFromToken(String token) {
         return getClaimsFromToken(token).getSubject();
     }
 
-    public Collection<? extends GrantedAuthority> getAuthoritiesFromToken(String token) {
-        return userServices.findUserByEmail(getUsernameFromToken(token)).getAuthorities();
-    }
-
     public User getUserFromToken(String token) {
-        return userServices.findUserByEmail(getUsernameFromToken(token));
+        return userRepository.findByEmail(getUsernameFromToken(token)).orElseThrow((() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "No user with email "+getUsernameFromToken(token))));
     }
 
     public Date getExpirationDateFromToken(String token) {
         return getClaimsFromToken(token).getExpiration();
-    }
-
-    public Date getCreatedDateFromToken(String token) {
-        return new Date((Long) getClaimsFromToken(token).get(CREATED_DATE_KEY));
     }
 
     public Boolean isTokenExpired(String token) {
@@ -120,28 +110,6 @@ public class JwtService {
         final String username = getUsernameFromToken(token);
         return (username.equals(user.getEmail()) && !isTokenExpired(token));
     }
-
-
-    public Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
-        return created.before(lastPasswordReset);
-    }
-
-    public Boolean canTokenBeRefreshed(String token, Date lastPasswordReset) {
-        final Date created = getCreatedDateFromToken(token);
-        return (!isCreatedBeforeLastPasswordReset(created, lastPasswordReset) && !isTokenExpired(token));
-    }
-
-
-//    public String generateToken(UserDetails userDetails) {
-//        return generateToken(new HashMap<>(), userDetails);
-//    }
-
-//    public String generateToken(
-//            Map<String, Object> extraClaims,
-//            UserDetails userDetails
-//    ) {
-//        return buildToken(extraClaims, userDetails, jwtExpiration);
-//    }
 
     public String generateRefreshToken(
             UserDetails userDetails
@@ -162,15 +130,6 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
     }
 
     private Claims extractAllClaims(String token) {

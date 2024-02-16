@@ -1,22 +1,27 @@
 package com.nk2.unityDoServices.Services;
 
+import com.nk2.unityDoServices.Configs.JwtAuthenticationFilter;
+import com.nk2.unityDoServices.Configs.JwtService;
 import com.nk2.unityDoServices.DTOs.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
+import com.nk2.unityDoServices.Repositories.ActivityRepository;
 import com.nk2.unityDoServices.Repositories.RegistrationRepository;
 import com.nk2.unityDoServices.Repositories.UserRepository;
+import com.nk2.unityDoServices.Services.Mappers.ActivityMapperService;
+import com.nk2.unityDoServices.Services.Mappers.RegistrantsDetailsMapperServices;
+import com.nk2.unityDoServices.Services.Mappers.UserMapperServices;
 import com.nk2.unityDoServices.Utils.ListMapper;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +35,12 @@ public class UserServices{
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ActivityMapperService activityMapperService;
+
+    @Autowired
+    private ActivityRepository activityRepository;
 
     @Autowired
     private ListMapper listMapper;
@@ -46,33 +57,21 @@ public class UserServices{
     @Autowired
     private RegistrantsDetailsMapperServices registrantsDetailsMapperServices;
 
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private JwtService jwtService;
+
+
     public User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "user "+ email + " does not exist !!!"));
     }
 
-    public UserDetailsDTO getUserDetailByEmail(String email) {
-        return mapUserBuild(userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "user "+ email + " does not exist !!!")));
-    }
-
-    public UserDetailsDTO mapUserBuild(User user) {
-        try {
-            UserDetailsDTO userResponse = new UserDetailsDTO();
-            userResponse.setId(user.getId().longValue());
-            userResponse.setUsername(user.getName());
-            userResponse.setEmail(user.getEmail());
-            userResponse.setAuthorities(user.getRole());
-            return userResponse;
-        } catch (Exception e) {
-            log.error("Could not Map User to UserResponse: " + e.getMessage());
-            return UserDetailsDTO.builder().build();
-        }
-    }
-
     public User save(@Valid CreateNewUserDTO user) {
         if(user.getRole()==null){
-            user.setRole("user");}
+            user.setRole("User");}
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
         char[] password = user.getPassword().toCharArray();
         User newUser = modelMapper.map(user, User.class);
@@ -105,7 +104,7 @@ public class UserServices{
         return modelMapper.map(newUser, User.class);
     }
 
-    public List<UserDTO> getUserList() {
+    public List<UserDTO> getUserList(HttpServletRequest httpServletRequest) {
         List<User> userList = userRepository.findAll();
         return listMapper.mapList(userList, UserDTO.class, modelMapper);
     }
@@ -137,15 +136,33 @@ public class UserServices{
         return modelMapper.map(user, UserDTO.class);
     }
 
+    public List<ActivityWithStatusDTO> getRegisteredActivity(HttpServletRequest httpServletRequest, Integer id) {
+        List<Object[]> activitiesQuery = activityRepository.FindActivityRegisteredByUserId(id);
+        List<ActivityWithStatusDTO> activityList = activityMapperService.mapToActivityWithUserStatusDTO(activitiesQuery);
+        return activityList;
+    }
 
-    public Integer delete(Integer id) {
+    private void validateIdBelong(HttpServletRequest httpServletRequest, Integer id) {
+        if(httpServletRequest.isUserInRole("ActivityOwner") || httpServletRequest.isUserInRole("User")){
+            String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+            User targetUser = findUserByEmail(email);
+            if(targetUser.getId() != id){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this user is not belongs to you !");
+            }
+        }
+    }
+
+    public Integer delete(HttpServletRequest httpServletRequest,Integer id) {
+        validateIdBelong(httpServletRequest, id);
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
         userRepository.deleteById(id);
         return id;
     }
 
-    public User update(Integer id, UserDTO updateUser) {
+    public User update(HttpServletRequest httpServletRequest,Integer id, UserDTO updateUser) {
+        validateIdBelong(httpServletRequest, id);
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
         user.setName(updateUser.getName());
@@ -171,7 +188,15 @@ public class UserServices{
         return user;
     }
 
-    public Registration updateRegistration(Integer id, String status) {
+    public Registration updateRegistration(HttpServletRequest httpServletRequest, Integer id, String status) {
+        if(httpServletRequest.isUserInRole("User")){
+            String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+            User targetUser = findUserByEmail(email);
+            if(targetUser.getId() != id){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this user is not belongs to you !");
+            }
+        }
         Registration registration = registrationRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
         registration.setStatus(status);
