@@ -1,6 +1,10 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.*;
+import com.nk2.unityDoServices.DTOs.Activity.*;
+import com.nk2.unityDoServices.DTOs.Image.CreateNewImageDTO;
+import com.nk2.unityDoServices.DTOs.Image.ImageDTO;
+import com.nk2.unityDoServices.DTOs.Location.LocationDTO;
+import com.nk2.unityDoServices.DTOs.User.RegistrantDTO;
 import com.nk2.unityDoServices.Entities.Image;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Services.ActivityServices;
@@ -27,8 +31,13 @@ public class ActivityController {
     private ImageServices imageServices;
 
     @GetMapping("/list")
-    public List<ActivityListDTO> getActivityList() {
-        return activityServices.getActivityList();
+    public List<ActivityListDTO> getActivityList(HttpServletRequest httpServletRequest) {
+        return activityServices.getActivityList(httpServletRequest);
+    }
+
+    @GetMapping("/management")
+    public List<ActivityListDTO> getActivityManagement(HttpServletRequest httpServletRequest) {
+        return activityServices.getActivityManagement(httpServletRequest);
     }
 
     @GetMapping("/poster")
@@ -67,13 +76,18 @@ public class ActivityController {
     }
 
     @PostMapping("/{activityId}/registration")
-    public Registration createActivity(HttpServletRequest request,@Valid @RequestPart("user") UserRegistrationDTO user,@PathVariable Integer activityId) {
-        return activityServices.registerActivity(request,user,activityId);
+    public Registration createActivity(HttpServletRequest request, @Valid @RequestBody Integer userId, @PathVariable Integer activityId) {
+        return activityServices.registerActivity(request, userId, activityId);
     }
 
     @GetMapping("/{activityId}/registrants")
     public List<RegistrantDTO> getActivityRegistrant(@PathVariable Integer activityId) {
         return userServices.getUserRegisteredActivity(activityId);
+    }
+
+    @GetMapping("/favorite")
+    public List<ActivityListDTO> getActivityFavorite() {
+        return activityServices.getActivityFavorite();
     }
 
 //    @GetMapping("/{activityId}/registrants")
@@ -90,7 +104,7 @@ public class ActivityController {
     public ActivityDTO createActivity(
             @Valid @RequestPart("activity") CreateNewActivityDTO activity
             , @Valid @RequestPart("location") LocationDTO location) {
-        return activityServices.save(activity,location);
+        return activityServices.save(activity, location);
     }
 
     @PostMapping("/images")
@@ -107,7 +121,7 @@ public class ActivityController {
     @PatchMapping("/{id}")
     public ActivityDTO updateActivity(
             HttpServletRequest httpServletRequest
-            ,@Valid @RequestPart("updateActivity") UpdateActivityDTO updateActivity
+            , @Valid @RequestPart("updateActivity") UpdateActivityDTO updateActivity
             , @Valid @RequestPart("updateLocation") LocationDTO updateLocation
             , @PathVariable Integer id) {
         return activityServices.update(httpServletRequest, id, updateActivity, updateLocation);

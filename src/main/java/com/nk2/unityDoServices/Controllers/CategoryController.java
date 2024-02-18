@@ -1,7 +1,7 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.AllCategoryDTO;
-import com.nk2.unityDoServices.DTOs.CategoryDTO;
+import com.nk2.unityDoServices.DTOs.Catrgory.AllCategoryDTO;
+import com.nk2.unityDoServices.DTOs.Catrgory.CategoryDTO;
 import com.nk2.unityDoServices.Services.CategoryServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

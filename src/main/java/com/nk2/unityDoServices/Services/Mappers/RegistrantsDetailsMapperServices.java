@@ -1,11 +1,8 @@
 package com.nk2.unityDoServices.Services.Mappers;
 
-import com.nk2.unityDoServices.DTOs.RegistrantDetailsDTO;
+import com.nk2.unityDoServices.DTOs.User.RegistrantDetailsDTO;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;

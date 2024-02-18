@@ -16,7 +16,8 @@ public class Validation {
     @JoinColumn(name = "activityId", nullable = false)
     private Activity activityId;
 
-    @Column(name = "validationType", nullable = false, length = 100)
+    @Lob
+    @Column(name = "validationType")
     private String validationType;
 
     @Column(name = "validationRule", nullable = false)

@@ -8,15 +8,15 @@ import java.util.List;
 
 public interface RegistrationRepository extends JpaRepository<Registration,Integer> {
 
-    @Query(value = "SELECT r.* from Registration r WHERE r.userId = :userId AND r.activityId = :activityId", nativeQuery = true)
+    @Query(value = "SELECT r.* from registration r WHERE r.userId = :userId AND r.activityId = :activityId", nativeQuery = true)
     Registration FindAllByActivityAndUserID(Integer activityId, Integer userId);
 
-    @Query(value = "SELECT r.* from Registration r WHERE r.userId = :userId", nativeQuery = true)
+    @Query(value = "SELECT r.* from registration r WHERE r.userId = :userId", nativeQuery = true)
     List<Registration> FindAllRegistrationFromUserId(Integer userId);
 
-    @Query(value = "SELECT r.* from Registration r WHERE r.activityId = :activity", nativeQuery = true)
+    @Query(value = "SELECT r.* from registration r WHERE r.activityId = :activity", nativeQuery = true)
     List<Registration> FindAllRegistrationFromActivityId(Integer activity);
 
-    @Query(value = "SELECT r.* from Registration r WHERE r.activityId = :activityId AND r.status = :status", nativeQuery = true)
+    @Query(value = "SELECT r.* from registration r WHERE r.activityId = :activityId AND r.status = :status", nativeQuery = true)
     List<Registration> FindAllActivityRegistrationByStatus(Integer activityId, String status);
 }

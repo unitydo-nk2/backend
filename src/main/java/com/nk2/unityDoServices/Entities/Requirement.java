@@ -19,13 +19,13 @@ public class Requirement {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "medicalInfomation", nullable = false)
-    private Medicalinfomation medicalInfomation;
+    private MedicalInfomation medicalInfomation;
 
-    public Medicalinfomation getMedicalInfomation() {
+    public MedicalInfomation getMedicalInfomation() {
         return medicalInfomation;
     }
 
-    public void setMedicalInfomation(Medicalinfomation medicalInfomation) {
+    public void setMedicalInfomation(MedicalInfomation medicalInfomation) {
         this.medicalInfomation = medicalInfomation;
     }
 

@@ -2,7 +2,9 @@ package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.Configs.JwtAuthenticationFilter;
 import com.nk2.unityDoServices.Configs.JwtService;
-import com.nk2.unityDoServices.DTOs.*;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.User.*;
+import com.nk2.unityDoServices.Entities.Activity;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Repositories.ActivityRepository;
@@ -16,7 +18,6 @@ import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -63,6 +64,13 @@ public class UserServices{
     @Autowired
     private JwtService jwtService;
 
+    public UserDetailsDTO getUserByEmail() {
+        String token  = jwtAuthenticationFilter.getJwtToken();
+        String email = jwtService.extractUsername(token);
+        User user = userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "user "+ email + " does not exist !!!"));
+        return modelMapper.map(user, UserDetailsDTO.class);
+    }
 
     public User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -70,8 +78,10 @@ public class UserServices{
     }
 
     public User save(@Valid CreateNewUserDTO user) {
+        System.out.println("role "+user.getRole());
         if(user.getRole()==null){
-            user.setRole("User");}
+            user.setRole("User");
+        }
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
         char[] password = user.getPassword().toCharArray();
         User newUser = modelMapper.map(user, User.class);
@@ -110,6 +120,16 @@ public class UserServices{
     }
 
     public RegistrantDetailsDTO getRegistrantDetails(Integer activityId) {
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User targetUser = findUserByEmail(email);
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "activity id "+activityId + " does not exist !!!"));
+        if (targetUser.getRole().equals("ActivityOwner")) {
+            if(activity.getActivityOwner().getId() != targetUser.getId()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this activity is not belongs to you !");
+            }
+        }
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromRegistrationId(activityId);
         System.out.println("userList : "+userList);
         List<RegistrantDetailsDTO> registrantList = registrantsDetailsMapperServices.mapToRegistrantsDetailsDTO(userList);
@@ -119,6 +139,16 @@ public class UserServices{
                         "There is no registration id :" + activityId));    }
 
     public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User targetUser = findUserByEmail(email);
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "activity id "+activityId + " does not exist !!!"));
+        if (targetUser.getRole().equals("ActivityOwner")) {
+            if(activity.getActivityOwner().getId() != targetUser.getId()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this activity is not belongs to you !");
+            }
+        }
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
         System.out.println("userList : "+userList);
         List<RegistrantDTO> registrantList = userMapperServices.mapToRegistrantDTO(userList);
@@ -130,10 +160,25 @@ public class UserServices{
 //        return userList;
 //    }
 
-    public UserDTO getUserById(Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+    public UserDTO getUserById(HttpServletRequest httpServletRequest, Integer userId) {
+        System.out.println("getUserById");
+        User user = jwtService.getUserFromToken(jwtAuthenticationFilter.getJwtToken());
+        System.out.println("user "+user.getId());
+        System.out.println("user role "+user.getRole());
+        System.out.println("user in role user "+ user.getRole().equals("User"));
+        System.out.println("user in role activityOwner "+ user.getRole().equals("ActivityOwner"));
+        if(user.getRole().equals("User") || user.getRole().equals("ActivityOwner")){
+            System.out.println("user is null "+ user == null);
+            System.out.println("userId "+userId);
+            System.out.println("user.getId() "+user.getId());
+            System.out.println(user != null || userId != user.getId());
+            if(user != null || userId != user.getId()){
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete event which you didn't own");
+            }
+        }
+        User newUser = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 userId + " does not exist !!!"));
-        return modelMapper.map(user, UserDTO.class);
+        return modelMapper.map(newUser, UserDTO.class);
     }
 
     public List<ActivityWithStatusDTO> getRegisteredActivity(HttpServletRequest httpServletRequest, Integer id) {
@@ -161,29 +206,26 @@ public class UserServices{
         return id;
     }
 
-    public User update(HttpServletRequest httpServletRequest,Integer id, UserDTO updateUser) {
+    public User update(HttpServletRequest httpServletRequest,Integer id, UpdatedUserDTO updateUser) {
         validateIdBelong(httpServletRequest, id);
-        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        User user = userRepository.findById(id).map(targetUser -> {
+            targetUser.setName(updateUser.getName().trim());
+            targetUser.setSurName(updateUser.getSurName().trim());
+            targetUser.setNickName(updateUser.getNickName().trim());
+            targetUser.setGender(updateUser.getGender().trim());
+            targetUser.setDateOfBirth(updateUser.getDateOfBirth());
+            targetUser.setReligion(updateUser.getReligion());
+            targetUser.setTelephoneNumber(updateUser.getTelephoneNumber());
+            targetUser.setAddress(updateUser.getAddress().trim());
+            targetUser.setEmergencyPhoneNumber(updateUser.getEmergencyPhoneNumber());
+            targetUser.setProfileImg(updateUser.getProfileImg());
+            targetUser.setLine(updateUser.getLine());
+            targetUser.setInstagram(updateUser.getInstagram());
+            targetUser.setX(updateUser.getX());
+            targetUser.setUpdateTime(Instant.now());
+            return  targetUser;
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
-        user.setName(updateUser.getName());
-        user.setUsername(updateUser.getUsername());
-        user.setPassword(updateUser.getPassword());
-        user.setSurName(updateUser.getSurName());
-        user.setNickName(updateUser.getNickName());
-        user.setEmail(updateUser.getEmail());
-        user.setGender(updateUser.getGender());
-        user.setDateOfBirth(updateUser.getDateOfBirth());
-        user.setReligion(updateUser.getReligion());
-        user.setTelephoneNumber(updateUser.getTelephoneNumber());
-        user.setAddress(updateUser.getAddress());
-        user.setRole(updateUser.getRole());
-        user.setEmergencyPhoneNumber(updateUser.getEmergencyPhoneNumber());
-        user.setProfileImg(updateUser.getProfileImg());
-        user.setLine(updateUser.getLine());
-        user.setInstagram(updateUser.getInstagram());
-        user.setX(updateUser.getX());
-        user.setCreateTime(updateUser.getCreateTime());
-        user.setUpdateTime(updateUser.getUpdateTime());
         userRepository.saveAndFlush(user);
         return user;
     }

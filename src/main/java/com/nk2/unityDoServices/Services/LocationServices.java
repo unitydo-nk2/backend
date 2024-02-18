@@ -1,6 +1,6 @@
 package com.nk2.unityDoServices.Services;
 
-import com.nk2.unityDoServices.DTOs.LocationDTO;
+import com.nk2.unityDoServices.DTOs.Location.LocationDTO;
 import com.nk2.unityDoServices.Entities.Location;
 import com.nk2.unityDoServices.Repositories.LocationRepository;
 import com.nk2.unityDoServices.Utils.ListMapper;

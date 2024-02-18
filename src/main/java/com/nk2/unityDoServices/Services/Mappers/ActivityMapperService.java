@@ -1,11 +1,8 @@
 package com.nk2.unityDoServices.Services.Mappers;
 
-import com.nk2.unityDoServices.DTOs.ActivityWithRegistrationNumberDTO;
-import com.nk2.unityDoServices.DTOs.ActivityWithStatusDTO;
-import com.nk2.unityDoServices.DTOs.ActivityWithUserCountDTO;
-import com.nk2.unityDoServices.Repositories.CategoryRepository;
-import com.nk2.unityDoServices.Repositories.LocationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityWithRegistrationNumberDTO;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityWithUserCountDTO;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;

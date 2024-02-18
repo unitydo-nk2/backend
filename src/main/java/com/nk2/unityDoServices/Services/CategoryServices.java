@@ -1,9 +1,9 @@
 package com.nk2.unityDoServices.Services;
 
-import com.nk2.unityDoServices.DTOs.AllCategoryDTO;
-import com.nk2.unityDoServices.DTOs.CategoryDTO;
+import com.nk2.unityDoServices.DTOs.Catrgory.AllCategoryDTO;
+import com.nk2.unityDoServices.DTOs.Catrgory.CategoryDTO;
 import com.nk2.unityDoServices.Entities.Category;
-import com.nk2.unityDoServices.Entities.Maincategory;
+import com.nk2.unityDoServices.Entities.MainCategory;
 import com.nk2.unityDoServices.Repositories.CategoryRepository;
 import com.nk2.unityDoServices.Repositories.MainCategoryRepository;
 import com.nk2.unityDoServices.Utils.ListMapper;
@@ -28,7 +28,7 @@ public class CategoryServices {
     private ModelMapper modelMapper;
 
     public List<CategoryDTO> getCategoryList() {
-        List<Maincategory> categoryList = mainCategoryRepository.findAll();
+        List<MainCategory> categoryList = mainCategoryRepository.findAll();
         System.out.println("categoryList " + categoryList);
         return listMapper.mapList(categoryList, CategoryDTO.class, modelMapper);
     };

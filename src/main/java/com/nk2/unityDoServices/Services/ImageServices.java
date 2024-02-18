@@ -1,6 +1,7 @@
 package com.nk2.unityDoServices.Services;
 
-import com.nk2.unityDoServices.DTOs.*;
+import com.nk2.unityDoServices.DTOs.Image.CreateNewImageDTO;
+import com.nk2.unityDoServices.DTOs.Image.ImageDTO;
 import com.nk2.unityDoServices.Entities.*;
 import com.nk2.unityDoServices.Repositories.ActivityRepository;
 import com.nk2.unityDoServices.Repositories.ImageRepository;

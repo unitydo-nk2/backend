@@ -51,6 +51,7 @@ public class Activity {
     @Column(name = "announcementDate", nullable = false)
     private Instant announcementDate;
 
+    @Lob
     @Column(name = "activityStatus", nullable = false)
     private String activityStatus;
 
@@ -70,6 +71,7 @@ public class Activity {
     @Column(name = "createTime", nullable = false)
     private Instant createTime;
 
+    @Lob
     @Column(name = "activityFormat", nullable = false)
     private String activityFormat;
 

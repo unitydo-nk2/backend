@@ -1,6 +1,6 @@
 package com.nk2.unityDoServices.Validators.Constraints;
 
-import com.nk2.unityDoServices.DTOs.CreateNewActivityDTO;
+import com.nk2.unityDoServices.DTOs.Activity.CreateNewActivityDTO;
 import com.nk2.unityDoServices.Services.ActivityServices;
 import com.nk2.unityDoServices.Validators.Validators.RegistrationDateValidator;
 import jakarta.validation.ConstraintValidator;

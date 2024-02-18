@@ -1,7 +1,7 @@
 package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.Configs.JwtService;
-import com.nk2.unityDoServices.DTOs.UserLoginDTO;
+import com.nk2.unityDoServices.DTOs.User.UserLoginDTO;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Models.ErrorClass;
 import com.nk2.unityDoServices.Models.JwtResponse;
@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -52,13 +51,16 @@ public class AuthenticationServices {
         this.argon2PasswordEncoder = argon2PasswordEncoder;
     }
 
-    public ResponseEntity emailMatchSystem(@Valid String username, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        if(repository.existsByEmail(username)){
-            User user = repository.findByEmail(username)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "A user with the specified email DOES NOT exist"));
+    public ResponseEntity emailMatchSystem(@Valid String email, HttpServletResponse response, HttpServletRequest request) throws Exception {
+        System.out.println("username "+email);
+        System.out.println("email exists "+repository.existsByEmail(email));
+        if(repository.existsByEmail(email)){
+            User user = repository.findByEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NO_CONTENT, "A user with the specified email DOES NOT exist"));
+            System.out.println("user "+ user);
 
             final UserDetails userDetails = userDetailsService
-                    .loadUserByUsername(username);
+                    .loadUserByUsername(email);
 
             final String token = jwtService.generateUserToken(user);
             System.out.println("token : " + token);
@@ -68,7 +70,7 @@ public class AuthenticationServices {
 
             return ResponseEntity.ok(new JwtResponse("Login Success", token, refreshToken));
     }else{
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "A user with the specified email DOES NOT exist");
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT, "A user with the specified email DOES NOT exist");
     }
     }
 

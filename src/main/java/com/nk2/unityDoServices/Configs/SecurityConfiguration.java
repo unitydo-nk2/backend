@@ -44,45 +44,9 @@ public class SecurityConfiguration {
     };
 
     private static final String[] GUEST_GET_AVAILABLE = {
-            "/api/activities/list","/api/activities/poster","/api/activities/popular",
-            "/api/activities/{activityId}","/api/activities/{activityId}/images","/api/categories/**"
+            "/api/activities/list", "/api/activities/poster", "/api/activities/popular",
+            "/api/activities/{activityId}", "/api/activities/{activityId}/images", "/api/categories/**"
     };
-
-    private static final String[] ADMIN_PATH_AVAILABLE = {
-            "/api/categories/**",
-            "/api/users/list","/api/users/{userId}", "/api/users/{id}/activities","/api/users/registration/{id}",
-            "/api/activities/list","/api/activities/userRegistration","/api/activities/{activityId}"
-            ,"/api/activities/{activityId}/images"
-            ,"/api/activities/registration/{activityId}"
-            ,"/api/activities/{activityId}/images"
-            ,"/api/activities/{activityId}/registration"//get
-            ,"/api/activities"
-            ,"/api/activities/images" ,"/api/activities/images" ,"/api/activities/images/{id}"
-    };
-
-    private static final String[] USER_PATH_AVAILABLE = {
-            "/api/categories/**",
-            "/api/users/list","/api/users/{userId}","/api/users/{id}/activities",
-            "/api/activities/list","/api/activities/userRegistration",
-            "/api/activities/{activityId}", // get
-            "/api/activities/{activityId}/images"
-            ,"/api/activities/{activityId}/images"
-            ,"/api/activities/{activityId}/registration" //post
-            ,"/api/activities/images/{id}"
-    };
-
-    private static final String[] ACTIVITY_OWNER_PATH_AVAILABLE = {
-            "/api/categories/**",
-            "/api/users/list","/api/users/{userId}","/api/users/registration/{id}",
-            "/api/activities/list","/api/activities/userRegistration","/api/activities/userRegistration",
-            "/api/activities/{activityId}", // get , delete
-            "/api/{activityId}/images"
-            ,"/api/activities/{activityId}/images"
-            ,"/api/activities/registration/{activityId}"
-            ,"/api/activities/{activityId}/registration" //get
-            ,"/api/activities/images/{id}"
-    };
-
 
     final JwtEntryPoint jwtEntryPoint;
     final JwtAuthenticationFilter jwtFilter;
@@ -90,6 +54,7 @@ public class SecurityConfiguration {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        System.out.println("do cors ConfigurationSource");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOriginPattern("*");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -102,6 +67,7 @@ public class SecurityConfiguration {
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("do filter chain");
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -109,16 +75,20 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(GUEST_PATH_AVAILABLE).permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/tracks/{activityId}").permitAll()
                         .requestMatchers(HttpMethod.GET,GUEST_GET_AVAILABLE).permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/activities/userRegistration","/api/activities/registration/{activityId}"
-                                ,"api/users/{id}/activities","api/users/registration/{id}","api/users/{activityId}/registrants").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
-                        .requestMatchers(HttpMethod.POST,"/api/activities","/api/activities/images","api/activities/{activityId}/registration").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
-                        .requestMatchers(HttpMethod.DELETE,"/api/activities/{id}","api/users/{id}").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
-                        .requestMatchers(HttpMethod.PATCH,"/api/activities/{id}","/api/activities/images/{id}","api/users/registration/{id}").hasAnyRole(Role.Admin.name(),Role.ActivityOwner.name())
-                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAuthority(Role.User.name())
-                        .requestMatchers(HttpMethod.PATCH,"/api/users/{id}").hasAnyRole(Role.Admin.name(),Role.User.name())
-                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAnyAuthority(Role.Admin.name())
-                        .requestMatchers(HttpMethod.GET,"api/activities/recommends").hasAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.GET,"/api/activities/management","/api/activities/userRegistration","/api/activities/registration/{activityId}"
+                                ,"api/users/{id}/activities","api/users/registration/{id}","api/users/{activityId}/registrants").hasAnyAuthority(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.POST,"/api/tracks/favorite").hasAnyAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/tracks/unFavorite/{favoriteId}").hasAnyAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority(Role.Admin.name(),Role.ActivityOwner.name(),Role.User.name())
+                        .requestMatchers(HttpMethod.POST,"/api/activities","/api/activities/images").hasAnyAuthority(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.DELETE,"/api/activities/{id}","api/users/{id}").hasAnyAuthority(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/activities/{id}","/api/activities/images/{id}","api/users/registration/{id}").hasAnyAuthority(Role.Admin.name(),Role.ActivityOwner.name())
+                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAnyAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/users/{id}").hasAnyAuthority(Role.Admin.name(),Role.User.name())
+                        .requestMatchers(HttpMethod.GET,"api/activities/recommends","api/activities/favorite").hasAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.GET,"api/users/list").hasAuthority(Role.Admin.name())
                         .anyRequest().authenticated()
                 );
         http.authenticationProvider(authenticationProvider());

@@ -3,8 +3,8 @@ package com.nk2.unityDoServices.Entities;
 import jakarta.persistence.*;
 
 @Table(name = "answer", indexes = {
-        @Index(name = "fk_answer_Registeration1_idx", columnList = "registrationId"),
-        @Index(name = "fk_Answer_QuestionTitle1_idx", columnList = "questionId")
+        @Index(name = "fk_Answer_QuestionTitle1_idx", columnList = "questionId"),
+        @Index(name = "fk_answer_Registration1_idx", columnList = "registrationId")
 })
 @Entity
 public class Answer {
@@ -19,7 +19,7 @@ public class Answer {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "questionId", nullable = false)
-    private Questiontitle questionId;
+    private QuestionTitle questionId;
 
     @Column(name = "answer", nullable = false, length = 400)
     private String answer;
@@ -32,11 +32,11 @@ public class Answer {
         this.answer = answer;
     }
 
-    public Questiontitle getQuestionId() {
+    public QuestionTitle getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(Questiontitle questionId) {
+    public void setQuestionId(QuestionTitle questionId) {
         this.questionId = questionId;
     }
 

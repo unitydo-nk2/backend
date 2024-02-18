@@ -1,14 +1,15 @@
 package com.nk2.unityDoServices.Repositories;
 
-import com.nk2.unityDoServices.DTOs.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
 import com.nk2.unityDoServices.Entities.Activity;
+import com.nk2.unityDoServices.Entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
 public interface ActivityRepository extends JpaRepository<Activity,Integer> {
-
+    List<Activity> findByActivityOwner(User activityOwner);
     @Query(value="SELECT a.*, COUNT(ah.userId) as userCount " +
             "FROM activity a " +
             "INNER JOIN userActivityHistory ah ON a.activityId = ah.activityId " +
@@ -38,4 +39,18 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "GROUP BY a.activityId " +
             "ORDER BY a.activityName ASC ", nativeQuery = true)
     List<Object[]> FindActivityWithRegisterAmount();
+
+    @Query(value="SELECT a.*, COUNT(r.userId) as userCount " +
+            "FROM activity a " +
+            "INNER JOIN registration r ON a.activityId = r.activityId " +
+            "WHERE a.activityOwner = :activityId "+
+            "GROUP BY a.activityId " +
+            "ORDER BY a.activityName ASC ", nativeQuery = true)
+    List<Object[]> FindActivityByStatusAndUserIdOwnedByActivityOwner(Integer activityId);
+
+    @Query(value="SELECT a.* " +
+            "FROM activity a " +
+            "INNER JOIN activityFavorite f ON a.activityId = f.activityId " +
+            "WHERE f.userId = :userId ", nativeQuery = true)
+    List<Activity> findActivityFavorite(Integer userId);
 }

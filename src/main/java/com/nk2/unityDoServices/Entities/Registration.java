@@ -1,7 +1,5 @@
 package com.nk2.unityDoServices.Entities;
 
-import com.nk2.unityDoServices.Enums.RegistrationStatus;
-import com.nk2.unityDoServices.Validators.Validators.EnumValidator;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -9,6 +7,8 @@ import java.time.Instant;
 @Table(name = "registration", indexes = {
         @Index(name = "fk_Registration_Activity1_idx", columnList = "activityId"),
         @Index(name = "fk_Registration_Users1_idx", columnList = "userId")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "registrationId_UNIQUE", columnNames = {"registrationId"})
 })
 @Entity
 public class Registration {
@@ -24,7 +24,6 @@ public class Registration {
     @Column(name = "registrationDate", nullable = false)
     private Instant registrationDate;
 
-    @EnumValidator(enumClass = RegistrationStatus.class)
     @Lob
     @Column(name = "status", nullable = false)
     private String status;

@@ -10,20 +10,20 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "categoryId", nullable = false)
-    private Integer categoryId;
+    private Integer id;
 
     @Column(name = "category", nullable = false, length = 100)
     private String category;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "mainCategory", nullable = false)
-    private Maincategory mainCategory;
+    private MainCategory mainCategory;
 
-    public Maincategory getMainCategory() {
+    public MainCategory getMainCategory() {
         return mainCategory;
     }
 
-    public void setMainCategory(Maincategory mainCategory) {
+    public void setMainCategory(MainCategory mainCategory) {
         this.mainCategory = mainCategory;
     }
 
@@ -36,10 +36,10 @@ public class Category {
     }
 
     public Integer getId() {
-        return categoryId;
+        return id;
     }
 
     public void setId(Integer id) {
-        this.categoryId = id;
+        this.id = id;
     }
 }

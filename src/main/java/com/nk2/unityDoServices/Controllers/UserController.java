@@ -1,9 +1,9 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.*;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.User.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
-import com.nk2.unityDoServices.Services.ActivityServices;
 import com.nk2.unityDoServices.Services.AuthenticationServices;
 import com.nk2.unityDoServices.Services.UserServices;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +21,12 @@ public class UserController {
     private UserServices userServices;
 
     @Autowired
-    private ActivityServices activityServices;
-
-    @Autowired
     private AuthenticationServices authenticationServices;
+
+    @GetMapping("")
+    public UserDetailsDTO getUserFromEmail() {
+        return userServices.getUserByEmail();
+    }
 
     @GetMapping("/list")
     public List<UserDTO> getUserList(HttpServletRequest httpServletRequest) {
@@ -32,8 +34,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserDTO getUserDetailsById(@PathVariable Integer userId) {
-        return userServices.getUserById(userId);
+    public UserDTO getUserDetailsById(HttpServletRequest request, @PathVariable Integer userId) {
+        return userServices.getUserById(request, userId);
     }
 
     @GetMapping("/{id}/activities")
@@ -62,7 +64,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public User updateUser(HttpServletRequest httpServletRequest,
-                           @Valid @RequestPart("updateUser") UserDTO updateUser
+                           @Valid @RequestPart("updateUser") UpdatedUserDTO updateUser
             , @PathVariable Integer id) {
         return userServices.update(httpServletRequest,id, updateUser);
     }

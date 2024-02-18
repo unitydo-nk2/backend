@@ -1,7 +1,7 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.CreateNewUserDTO;
-import com.nk2.unityDoServices.DTOs.UserLoginDTO;
+import com.nk2.unityDoServices.DTOs.User.CreateNewUserDTO;
+import com.nk2.unityDoServices.DTOs.User.UserLoginDTO;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.AuthenticationServices;
 import com.nk2.unityDoServices.Services.UserServices;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.ServletWebRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -35,12 +34,11 @@ public class AuthenticationController {
         return authenticationServices.login(userLogin, response, request);
     }
 
-    @GetMapping("/getGoogleToken")
-    @ResponseStatus(code = HttpStatus.OK)
-    public ResponseEntity getGoogleToken(@Valid @RequestBody String userName,
+    @PostMapping("/getGoogleToken")
+    public ResponseEntity getGoogleToken(@Valid @RequestPart("email") String email,
                                          HttpServletResponse response,
                                          HttpServletRequest request) throws Exception {
-        return authenticationServices.emailMatchSystem(userName,
+        return authenticationServices.emailMatchSystem(email,
                 response,
                 request);
     }
