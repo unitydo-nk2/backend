@@ -137,8 +137,16 @@ public class UserServices{
     public RegistrantDetailsDTO getRegistrantDetails(Integer activityId) {
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User targetUser = findUserByEmail(email);
-        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+
+        Registration registration = registrationRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "registration id "+activityId + " does not exist !!!"));
+
+        Activity activity = activityRepository.findById(registration.getActivityId().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "activity id "+activityId + " does not exist !!!"));
+
+        System.out.println("activity owner id is : "+activity.getActivityOwner().getId());
+        System.out.println("this user id : "+targetUser.getId());
+
         if (targetUser.getRole().equals("ActivityOwner")) {
             if(activity.getActivityOwner().getId() != targetUser.getId()){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -151,7 +159,8 @@ public class UserServices{
         return registrantList.stream()
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no registration id :" + activityId));    }
+                        "There is no registration id :" + activityId));
+    }
 
     public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
