@@ -2,12 +2,16 @@ package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.Configs.JwtAuthenticationFilter;
 import com.nk2.unityDoServices.Configs.JwtService;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityListDTO;
 import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.Activity.RegisteredActivityDTO;
 import com.nk2.unityDoServices.DTOs.User.*;
 import com.nk2.unityDoServices.Entities.Activity;
+import com.nk2.unityDoServices.Entities.Image;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Repositories.ActivityRepository;
+import com.nk2.unityDoServices.Repositories.ImageRepository;
 import com.nk2.unityDoServices.Repositories.RegistrationRepository;
 import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Services.Mappers.ActivityMapperService;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -64,9 +69,15 @@ public class UserServices{
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private ImageRepository imageRepository;
+
     public UserDetailsDTO getUserByEmail() {
+        System.out.println("getUserByEmail");
         String token  = jwtAuthenticationFilter.getJwtToken();
+        System.out.println("token "+token);
         String email = jwtService.extractUsername(token);
+        System.out.println("email "+email);
         User user = userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "user "+ email + " does not exist !!!"));
         return modelMapper.map(user, UserDetailsDTO.class);
@@ -81,6 +92,10 @@ public class UserServices{
         System.out.println("role "+user.getRole());
         if(user.getRole()==null){
             user.setRole("User");
+        }
+        if(userRepository.existsByEmail(user.getEmail())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "This email have been used!");
         }
         Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
         char[] password = user.getPassword().toCharArray();
@@ -181,10 +196,25 @@ public class UserServices{
         return modelMapper.map(newUser, UserDTO.class);
     }
 
-    public List<ActivityWithStatusDTO> getRegisteredActivity(HttpServletRequest httpServletRequest, Integer id) {
+    public List<RegisteredActivityDTO> getRegisteredActivity() {
+        // dothiskub
+        User user = jwtService.getUserFromToken(jwtAuthenticationFilter.getJwtToken());
+        Integer id = user.getId();
         List<Object[]> activitiesQuery = activityRepository.FindActivityRegisteredByUserId(id);
         List<ActivityWithStatusDTO> activityList = activityMapperService.mapToActivityWithUserStatusDTO(activitiesQuery);
-        return activityList;
+        List<RegisteredActivityDTO> registeredActivityDTO = new ArrayList<>();
+
+        for (ActivityWithStatusDTO activity : activityList) {
+            RegisteredActivityDTO dto = new RegisteredActivityDTO(activity);
+            List<Image> img = imageRepository.getImagePosterbyActivityId(activity.getActivityId());
+            if (img.isEmpty()) {
+                dto.setImagePath(null);
+            } else {
+                dto.setImagePath(img.get(0).getImagepath());
+            }
+            registeredActivityDTO.add(dto);
+        }
+        return registeredActivityDTO;
     }
 
     private void validateIdBelong(HttpServletRequest httpServletRequest, Integer id) {

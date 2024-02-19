@@ -1,6 +1,7 @@
 package com.nk2.unityDoServices.Controllers;
 
 import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
+import com.nk2.unityDoServices.DTOs.Activity.RegisteredActivityDTO;
 import com.nk2.unityDoServices.DTOs.User.*;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Entities.User;
@@ -38,10 +39,9 @@ public class UserController {
         return userServices.getUserById(request, userId);
     }
 
-    @GetMapping("/{id}/activities")
-    public List<ActivityWithStatusDTO> getRegisteredActivity(HttpServletRequest httpServletRequest,
-                                                             @PathVariable Integer id) {
-        return userServices.getRegisteredActivity(httpServletRequest,id);
+    @GetMapping("/registered")
+    public List<RegisteredActivityDTO> getRegisteredActivity(HttpServletRequest httpServletRequest) {
+        return userServices.getRegisteredActivity();
     }
 
     @GetMapping("/registration/{id}")

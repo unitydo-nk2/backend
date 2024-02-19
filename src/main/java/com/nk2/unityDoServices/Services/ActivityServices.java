@@ -250,7 +250,7 @@ public class ActivityServices {
         if (user != null) {
             if (user.getId() != userId) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The booking email must be the same as the student's email");
+                        "The register email must be the same as user email");
             }
             if (!user.getRole().equals("User")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,

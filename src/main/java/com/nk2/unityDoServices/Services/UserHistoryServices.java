@@ -42,14 +42,19 @@ public class UserHistoryServices {
         return userActivityHistoryRepository.saveAndFlush(userHistory);
     }
 
-    public ActivityFavorite setUserFavorite(Integer activityId, String email){
+    public void setUserFavorite(Integer activityId, String email){
         User user = userServices.findUserByEmail(email);
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
-        ActivityFavorite activityfavorite = new ActivityFavorite();
-        activityfavorite.setUserId(user);
-        activityfavorite.setActivityId(activity);
-        return activityFavoriteRepository.saveAndFlush(activityfavorite);
+        ActivityFavorite activityFavorite = activityFavoriteRepository.findActivityFavorite(activityId,user.getId());
+        if(activityFavorite == null){
+            ActivityFavorite activityfavorite = new ActivityFavorite();
+            activityfavorite.setUserId(user);
+            activityfavorite.setActivityId(activity);
+            activityFavoriteRepository.saveAndFlush(activityfavorite);
+        }else{
+            activityFavoriteRepository.deleteById(activityFavorite.getId());
+        }
     }
 
     public Integer setUserUnFavorite(Integer activityId, String email){
