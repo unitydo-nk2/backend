@@ -40,14 +40,24 @@ public class ActivityController {
         return activityServices.getActivityManagement(httpServletRequest);
     }
 
-    @GetMapping("/poster")
-    public List<ActivityImageDTO> getActivityPoster() {
-        return activityServices.getActivityPoster();
-    }
+//    @GetMapping("/poster")
+//    public List<ActivityImageDTO> getActivityPoster() {
+//        return activityServices.getActivityPoster();
+//    }
 
     @GetMapping("/popular")
-    public List<ActivityBannerDTO> getActivityPopularActivity() {
+    public List<PopularActivityDTO> getActivityPopularActivity() {
         return activityServices.getPopularActivity();
+    }
+
+    @GetMapping("/comingSoon")
+    public List<ActivityCardSliderListDTO> getActivityComingSoonActivity() {
+        return activityServices.getComingSoonActivity();
+    }
+
+    @GetMapping("/similar/{activityId}")
+    public List<ActivityCardSliderListDTO> getActivityPopularActivity(@PathVariable Integer activityId) {
+        return activityServices.getSimilarActivity(activityId);
     }
 
     @GetMapping("/recommends")

@@ -1,6 +1,5 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
 import com.nk2.unityDoServices.DTOs.Activity.RegisteredActivityDTO;
 import com.nk2.unityDoServices.DTOs.User.*;
 import com.nk2.unityDoServices.Entities.Registration;

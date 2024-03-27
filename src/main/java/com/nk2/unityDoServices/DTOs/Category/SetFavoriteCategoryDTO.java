@@ -1,4 +1,4 @@
-package com.nk2.unityDoServices.DTOs.Catrgory;
+package com.nk2.unityDoServices.DTOs.Category;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AllCategoryDTO {
-    private Integer id;
-    private String category;
+public class SetFavoriteCategoryDTO {
+    private String  userEmail;
     private Integer mainCategoryId;
-    private String mainCategory;
+    private Integer categoryRank;
 }

@@ -72,7 +72,7 @@ public class ActivityServices {
 //        return listMapper.mapList(activityList, ActivityListDTO.class, modelMapper);
 //    };
     public List<ActivityListDTO> getActivityList(HttpServletRequest httpServletRequest) {
-        List<Activity> activityList = repository.findAll();
+        List<Activity> activityList = repository.findAllAvailableActivity();
         List<ActivityListDTO> activityListDTOs = new ArrayList<>();
 
         for (Activity activity : activityList) {
@@ -120,10 +120,58 @@ public class ActivityServices {
     }
 
 
-    public List<ActivityBannerDTO> getPopularActivity() {
+    public List<PopularActivityDTO> getPopularActivity() {
         List<Object[]> activitiesQuery = repository.FindAllByFromUserCount();
         List<ActivityWithUserCountDTO> activityList = activityMapperService.mapToActivityWithUserCountDTO(activitiesQuery);
-        return listMapper.mapList(activityList, ActivityBannerDTO.class, modelMapper);
+        List<PopularActivityDTO> popularActivityList = new ArrayList<>();
+
+        for(ActivityWithUserCountDTO activity:activityList){
+            PopularActivityDTO popularActivity = modelMapper.map(activity,PopularActivityDTO.class);
+            List<Image> img = imageRepository.getImagePosterbyActivityId(popularActivity.getActivityId());
+            if (img.isEmpty()) {
+                popularActivity.setImagePath(null);
+            } else {
+                popularActivity.setImagePath(img.get(0).getImagepath());
+            }
+            popularActivityList.add(popularActivity);
+        }
+        return popularActivityList;
+    }
+
+    public List<ActivityCardSliderListDTO> getComingSoonActivity() {
+        List<Activity> activityList = repository.findUpComingActivity();
+        List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
+
+        for (Activity activity : activityList) {
+            ActivityCardSliderListDTO upComingActivity = modelMapper.map(activity, ActivityCardSliderListDTO.class);
+            List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
+            if (img.isEmpty()) {
+                upComingActivity.setImagePath(null);
+            } else {
+                upComingActivity.setImagePath(img.get(0).getImagepath());
+            }
+            activityListDTOs.add(upComingActivity);
+        }
+
+        return activityListDTOs;
+    }
+
+    public List<ActivityCardSliderListDTO> getSimilarActivity(Integer activityId) {
+        List<Activity> activityList = repository.findSimilarActivities(activityId);
+        List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
+
+        for (Activity activity : activityList) {
+            ActivityCardSliderListDTO upComingActivity = modelMapper.map(activity, ActivityCardSliderListDTO.class);
+            List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
+            if (img.isEmpty()) {
+                upComingActivity.setImagePath(null);
+            } else {
+                upComingActivity.setImagePath(img.get(0).getImagepath());
+            }
+            activityListDTOs.add(upComingActivity);
+        }
+
+        return activityListDTOs;
     }
 
     public ActivityDTO getActivityByID(Integer id) {
@@ -142,10 +190,10 @@ public class ActivityServices {
         return activityRecommendation;
     }
 
-    public List<ActivityImageDTO> getActivityPoster() {
-        List<Image> poster = imageRepository.findActivityPoster();
-        return listMapper.mapList(poster, ActivityImageDTO.class, modelMapper);
-    }
+//    public List<ActivityImageDTO> getActivityPoster() {
+//        List<Image> poster = imageRepository.findActivityPoster();
+//        return listMapper.mapList(poster, ActivityImageDTO.class, modelMapper);
+//    }
 
     public Instant convertDateTimeInstant(String dateTimeLocalString) {
         System.out.println("dateTimeLocalString = " + dateTimeLocalString);
@@ -236,8 +284,15 @@ public class ActivityServices {
                         "this user is not belongs to you !");
             }
         }
+
         Activity activity = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
+        List<Registration> registrationList = registrationRepository.FindAllRegistrationFromActivityId(id);
+
+        for (Registration registration : registrationList) {
+            registrationRepository.deleteById(registration.getId());
+        }
+
         repository.deleteById(id);
         return id;
     }

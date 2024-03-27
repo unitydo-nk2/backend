@@ -1,6 +1,5 @@
 package com.nk2.unityDoServices.Controllers;
 
-import com.nk2.unityDoServices.Entities.ActivityFavorite;
 import com.nk2.unityDoServices.Entities.UserActivityHistory;
 import com.nk2.unityDoServices.Services.UserHistoryServices;
 import jakarta.validation.Valid;

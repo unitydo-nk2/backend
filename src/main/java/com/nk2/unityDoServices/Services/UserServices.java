@@ -2,18 +2,13 @@ package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.Configs.JwtAuthenticationFilter;
 import com.nk2.unityDoServices.Configs.JwtService;
-import com.nk2.unityDoServices.DTOs.Activity.ActivityListDTO;
 import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
 import com.nk2.unityDoServices.DTOs.Activity.RegisteredActivityDTO;
+import com.nk2.unityDoServices.DTOs.Category.CategoryDTO;
+import com.nk2.unityDoServices.DTOs.Category.SetFavoriteCategoryDTO;
 import com.nk2.unityDoServices.DTOs.User.*;
-import com.nk2.unityDoServices.Entities.Activity;
-import com.nk2.unityDoServices.Entities.Image;
-import com.nk2.unityDoServices.Entities.Registration;
-import com.nk2.unityDoServices.Entities.User;
-import com.nk2.unityDoServices.Repositories.ActivityRepository;
-import com.nk2.unityDoServices.Repositories.ImageRepository;
-import com.nk2.unityDoServices.Repositories.RegistrationRepository;
-import com.nk2.unityDoServices.Repositories.UserRepository;
+import com.nk2.unityDoServices.Entities.*;
+import com.nk2.unityDoServices.Repositories.*;
 import com.nk2.unityDoServices.Services.Mappers.ActivityMapperService;
 import com.nk2.unityDoServices.Services.Mappers.RegistrantsDetailsMapperServices;
 import com.nk2.unityDoServices.Services.Mappers.UserMapperServices;
@@ -71,6 +66,12 @@ public class UserServices{
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private FavoriteCategoryRepository favoriteCategoryRepository;
+
+    @Autowired
+    private MainCategoryRepository mainCategoryRepository;
 
     public UserDetailsDTO getUserByEmail() {
         System.out.println("getUserByEmail");
@@ -179,10 +180,41 @@ public class UserServices{
         return registrantList;
     }
 
-//    public List<Object[]> getUserRegisteredActivity(Integer activityId) {
-//        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
-//        return userList;
-//    }
+    public List<RegistrantDTO> setRegistrantsForActivityDone(Integer activityId) {
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User targetUser = findUserByEmail(email);
+        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "activity id "+activityId + " does not exist !!!"));
+        if (targetUser.getRole().equals("ActivityOwner")) {
+            if(activity.getActivityOwner().getId() != targetUser.getId()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "this activity is not belongs to you !");
+            }
+        }
+       List<Registration> registrationList  = registrationRepository.FindAllRegistrationFromActivityId(activityId);
+
+        for (Registration registration : registrationList) {
+            // Check if the registration status is "passed"
+            if (registration.getStatus().equals("passed")) {
+                // Update status to "success"
+                registration.setStatus("success");
+                // Save the updated registration
+                registrationRepository.save(registration);
+            }
+        }
+        return listMapper.mapList(registrationList, RegistrantDTO.class, modelMapper) ;
+    }
+
+    public FavoriteCategory setUserFavoriteCategory(SetFavoriteCategoryDTO favoriteCategory) {
+        User user = findUserByEmail(favoriteCategory.getUserEmail());
+        MainCategory mainCategory = mainCategoryRepository.findById(favoriteCategory.getMainCategoryId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "category id "+favoriteCategory.getMainCategoryId() + " does not exist !!!"));
+        FavoriteCategory userFavoriteCategory = new FavoriteCategory();
+        userFavoriteCategory.setUserId(user);
+        userFavoriteCategory.setMainCategoryId(mainCategory);
+        userFavoriteCategory.setCategoryRank(favoriteCategory.getCategoryRank());
+        return favoriteCategoryRepository.saveAndFlush(userFavoriteCategory);
+    }
 
     public UserDTO getUserById(HttpServletRequest httpServletRequest, Integer userId) {
         System.out.println("getUserById");
@@ -195,9 +227,9 @@ public class UserServices{
             System.out.println("user is null "+ user == null);
             System.out.println("userId "+userId);
             System.out.println("user.getId() "+user.getId());
-            System.out.println(user != null || userId != user.getId());
-            if(user != null || userId != user.getId()){
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete event which you didn't own");
+            System.out.println(userId != user.getId());
+            if(userId != user.getId()){
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot get users which you didn't own");
             }
         }
         User newUser = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -226,7 +258,7 @@ public class UserServices{
         return registeredActivityDTO;
     }
 
-    private void validateIdBelong(HttpServletRequest httpServletRequest, Integer id) {
+    public void validateIdBelong(HttpServletRequest httpServletRequest, Integer id) {
         if(httpServletRequest.isUserInRole("ActivityOwner") || httpServletRequest.isUserInRole("User")){
             String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
             User targetUser = findUserByEmail(email);
@@ -239,8 +271,22 @@ public class UserServices{
 
     public Integer delete(HttpServletRequest httpServletRequest,Integer id) {
         validateIdBelong(httpServletRequest, id);
+
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
+
+        if (httpServletRequest.isUserInRole("ActivityOwner")) {
+            List<Activity> activityList = activityRepository.findByActivityOwner(user);
+            for (Activity activity : activityList) {
+                activityRepository.deleteById(activity.getId());
+            }
+        } else if (httpServletRequest.isUserInRole("User")){
+            List<Registration> registrationList = registrationRepository.FindAllRegistrationFromUserId(id);
+            for (Registration registration : registrationList) {
+                registrationRepository.deleteById(registration.getId());
+            }
+        }
+
         userRepository.deleteById(id);
         return id;
     }

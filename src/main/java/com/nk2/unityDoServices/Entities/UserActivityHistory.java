@@ -13,8 +13,8 @@ public class UserActivityHistory {
     @Column(name = "activityHistoryId", nullable = false)
     private Integer id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "userId", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "userId")
     private User userId;
 
     @ManyToOne(optional = false)

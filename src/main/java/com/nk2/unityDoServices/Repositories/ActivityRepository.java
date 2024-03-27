@@ -10,11 +10,21 @@ import java.util.List;
 
 public interface ActivityRepository extends JpaRepository<Activity,Integer> {
     List<Activity> findByActivityOwner(User activityOwner);
-    @Query(value="SELECT a.*, COUNT(ah.userId) as userCount " +
+
+    @Query(value="SELECT * " +
+            "FROM activity a " +
+            "WHERE a.activitydate >= NOW() " +
+            "AND a.registerEndDate >= NOW() " +
+            "AND a.activityStatus = 'Active'"+
+            "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
+    List<Activity> findAllAvailableActivity();
+
+    @Query(value="SELECT a.*, COUNT(ah.activityHistoryId) as userCount " +
             "FROM activity a " +
             "INNER JOIN userActivityHistory ah ON a.activityId = ah.activityId " +
             "GROUP BY a.activityId " +
-            "ORDER BY userCount DESC ", nativeQuery = true)
+            "ORDER BY userCount DESC "+
+            "limit 5", nativeQuery = true)
     List<Object[]> FindAllByFromUserCount();
 
     @Query(value = "SELECT a.*,r.status " +
@@ -53,4 +63,35 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "INNER JOIN activityFavorite f ON a.activityId = f.activityId " +
             "WHERE f.userId = :userId ", nativeQuery = true)
     List<Activity> findActivityFavorite(Integer userId);
+
+    @Query(value="SELECT * " +
+            "FROM activity a " +
+            "WHERE a.activitydate >= NOW() " +
+            "AND a.registerEndDate >= NOW() " +
+            "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) " +
+            "limit 4 ", nativeQuery = true)
+    List<Activity> findUpComingActivity();
+
+    @Query(value="SELECT a.*\n" +
+            "FROM activity a\n" +
+            "INNER JOIN category c ON a.categoryId = c.categoryId\n" +
+            "WHERE ( c.categoryId = (\n" +
+            "    SELECT categoryId\n" +
+            "    FROM activity\n" +
+            "    WHERE activityId = 1\n" +
+            ")\n" +
+            "OR c.mainCategory = (\n" +
+            "    SELECT mainCategory\n" +
+            "    FROM category\n" +
+            "    WHERE categoryId = (\n" +
+            "        SELECT categoryId\n" +
+            "        FROM activity\n" +
+            "        WHERE activityId = 1\n" +
+            "    )\n" +
+            ") )\n" +
+            "AND activitydate >= NOW() \n" +
+            "AND a.registerEndDate >= NOW() \n" +
+            "AND a.activityStatus = 'Active'\n" +
+            " limit 10;", nativeQuery = true)
+    List<Activity> findSimilarActivities(Integer activityId);
 }

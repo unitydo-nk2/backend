@@ -34,6 +34,7 @@ public class UserHistoryServices {
             User user = userServices.findUserByEmail(email);
             userHistory.setUserId(user);
         }else{
+            System.out.println("user id is null");
             userHistory.setUserId(null);
         }
         Activity activity = activityRepository.findById(activityId)

@@ -44,8 +44,9 @@ public class SecurityConfiguration {
     };
 
     private static final String[] GUEST_GET_AVAILABLE = {
-            "/api/activities/list", "/api/activities/poster", "/api/activities/popular",
-            "/api/activities/{activityId}", "/api/activities/{activityId}/images", "/api/categories/**"
+            "/api/activities/list", "/api/activities/poster", "/api/activities/popular","/api/activities/comingSoon",
+            "/api/activities/{activityId}", "/api/activities/{activityId}/images", "/api/categories/**",
+            "/api/tracks/{activityId}","/api/activities/similar/{activityId}"
     };
 
     final JwtEntryPoint jwtEntryPoint;

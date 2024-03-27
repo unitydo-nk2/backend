@@ -1,7 +1,9 @@
 package com.nk2.unityDoServices.Controllers;
 
+import com.nk2.unityDoServices.DTOs.Category.SetFavoriteCategoryDTO;
 import com.nk2.unityDoServices.DTOs.User.CreateNewUserDTO;
 import com.nk2.unityDoServices.DTOs.User.UserLoginDTO;
+import com.nk2.unityDoServices.Entities.FavoriteCategory;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Services.AuthenticationServices;
 import com.nk2.unityDoServices.Services.UserServices;
@@ -41,6 +43,12 @@ public class AuthenticationController {
         return authenticationServices.emailMatchSystem(email,
                 response,
                 request);
+    }
+
+    @PostMapping("/favoriteCategory")
+    public FavoriteCategory setUserFavoriteCategory(@Valid @RequestPart("favoriteCategory")
+                                                            SetFavoriteCategoryDTO favoriteCategory) {
+        return userServices.setUserFavoriteCategory(favoriteCategory);
     }
 
     @GetMapping("/refreshToken")
