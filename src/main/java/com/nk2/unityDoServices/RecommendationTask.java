@@ -27,9 +27,13 @@ public class RecommendationTask {
     @PostConstruct
     @Scheduled(cron = "0 0 0 * * ?")
     public void generateCSV(){
+        System.out.println("do task");
         List<ActivityWithCategory> activityList = activityWithCategoryRepository.findAll();
-        csvDownloadServices.generateActivityWithCategoryCSV(activityList,"activityWithCategory.csv");
+        csvDownloadServices.generateActivityWithCategoryCSV(activityList,"./activityWithCategory.csv");
+        System.out.println("activityWithCategory created");
         List<UserCategoryRanking> userCategoryRankings = userCategoryRankingRepository.findAll();
-        csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings,"userCategoryRankings.csv");
+        csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings,"./userCategoryRankings.csv");
+        System.out.println("userCategoryRankings created");
+
     }
 }
