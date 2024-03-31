@@ -60,9 +60,9 @@ public class ActivityController {
         return activityServices.getSimilarActivity(activityId);
     }
 
-    @GetMapping("/recommends")
-    public List<ActivityRecommendationDTO> getRecommendActivity() {
-        return activityServices.getRecommendedActivity();
+    @GetMapping("/recommends/{userId}")
+    public List<ActivityRecommendationDTO> getRecommendActivity(@PathVariable Integer userId) {
+        return activityServices.getRecommendedActivity(userId);
     }
 
     @GetMapping("/userRegistration")

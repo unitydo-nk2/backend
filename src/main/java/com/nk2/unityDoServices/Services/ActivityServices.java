@@ -180,7 +180,7 @@ public class ActivityServices {
         return new ActivityDTO(activity);
     }
 
-    public List<ActivityRecommendationDTO> getRecommendedActivity() {
+    public List<ActivityRecommendationDTO> getRecommendedActivity(Integer userId) {
         List<Activity> activityList = repository.findAll();
         List<ActivityRecommendationDTO> activityRecommendation = new ArrayList<>();
         for (Activity activity : activityList) {
