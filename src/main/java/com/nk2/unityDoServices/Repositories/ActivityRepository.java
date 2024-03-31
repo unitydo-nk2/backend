@@ -78,7 +78,7 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "WHERE ( c.categoryId = (\n" +
             "    SELECT categoryId\n" +
             "    FROM activity\n" +
-            "    WHERE activityId = 1\n" +
+            "    WHERE activityId = :activityId\n" +
             ")\n" +
             "OR c.mainCategory = (\n" +
             "    SELECT mainCategory\n" +
@@ -86,7 +86,7 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "    WHERE categoryId = (\n" +
             "        SELECT categoryId\n" +
             "        FROM activity\n" +
-            "        WHERE activityId = 1\n" +
+            "        WHERE activityId = :activityId\n" +
             "    )\n" +
             ") )\n" +
             "AND activitydate >= NOW() \n" +
