@@ -161,11 +161,10 @@ public class ActivityServices {
 
     public List<ActivityCardSliderListDTO> getRecommendsActivity(HttpServletRequest httpServletRequest){
         System.out.println("do getRecommendsActivity");
-        User targetUser = new User();
-        if (httpServletRequest.isUserInRole("user")) {
-            String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
-            targetUser = userServices.findUserByEmail(email);
-        }else{
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User targetUser = userServices.findUserByEmail(email);
+
+        if (!targetUser.getRole().equals("user")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "only user can get recommends activities");
         }
@@ -249,14 +248,17 @@ public class ActivityServices {
 
 
     public ActivityDTO update(HttpServletRequest httpServletRequest, Integer id, UpdateActivityDTO updateActivity, LocationDTO updateLocation) {
-        if (httpServletRequest.isUserInRole("user")) {
-            String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
-            User targetUser = userServices.findUserByEmail(email);
+
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User targetUser = userServices.findUserByEmail(email);
+
+        if (targetUser.getRole().equals("user")) {
             if (targetUser.getId() != id) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "this user is not belongs to you !");
             }
         }
+
         Location location = locationServices.save(updateLocation);
         Activity editActivity = repository.findById(id).map(activity -> {
             activity.setActivityName(updateActivity.getActivityName());
@@ -320,9 +322,11 @@ public class ActivityServices {
     }
 
     public Integer delete(HttpServletRequest httpServletRequest, Integer id) {
-        if (httpServletRequest.isUserInRole("activityOwner")) {
-            User targetUser = userRepository.findActivityOwner(id);
-            if (targetUser.getId() != id) {
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User activityOwner = userServices.findUserByEmail(email);
+
+        if (activityOwner.getRole().equals("activityOwner")) {
+            if (activityOwner.getId() != id) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "this user is not belongs to you !");
             }
