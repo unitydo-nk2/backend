@@ -146,7 +146,9 @@ public class ActivityServices {
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
 
         for (Activity activity : activityList) {
-            ActivityCardSliderListDTO upComingActivity = modelMapper.map(activity, ActivityCardSliderListDTO.class);
+            System.out.println("activity "+activity.getId());
+            ActivityCardSliderListDTO upComingActivity = new ActivityCardSliderListDTO(activity);
+            System.out.println("upComingActivity "+upComingActivity.getActivityId());
             List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
             if (img.isEmpty()) {
                 upComingActivity.setImagePath(null);
@@ -170,7 +172,9 @@ public class ActivityServices {
         }
 
         // URL to fetch data from
-        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
+//        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
+        String url = "http://localhost:5050/api/recommendActivities/"+targetUser.getId();
+
         System.out.println("fetch to "+url);
 
         // Create a RestTemplate instance
@@ -181,16 +185,21 @@ public class ActivityServices {
         System.out.println("response : "+response);
 
         List<ActivityReceiverDTO> activityList = Arrays.asList(response.getBody());
-
+        System.out.println(activityList);
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
 
         for (ActivityReceiverDTO activity : activityList) {
-            System.out.println("activity : "+activity);
+            System.out.println("activity : "+activity.getActivityId());
 
             Activity targetActivity = repository.findById(activity.getActivityId()).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
+            System.out.println("targetActivity : "+targetActivity.getId());
 
-            ActivityCardSliderListDTO upComingActivity = modelMapper.map(targetActivity, ActivityCardSliderListDTO.class);
+            ActivityCardSliderListDTO upComingActivity = new ActivityCardSliderListDTO(targetActivity);
+
+            System.out.println("upComingActivity : "+upComingActivity.getActivityId());
+
+
             List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
             if (img.isEmpty()) {
                 upComingActivity.setImagePath(null);
@@ -225,16 +234,6 @@ public class ActivityServices {
         Activity activity = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
         return new ActivityDTO(activity);
-    }
-
-    public List<ActivityRecommendationDTO> getRecommendedActivity(Integer userId) {
-        List<Activity> activityList = repository.findAll();
-        List<ActivityRecommendationDTO> activityRecommendation = new ArrayList<>();
-        for (Activity activity : activityList) {
-            ActivityRecommendationDTO dto = new ActivityRecommendationDTO(activity);
-            activityRecommendation.add(dto);
-        }
-        return activityRecommendation;
     }
 
     public Instant convertDateTimeInstant(String dateTimeLocalString) {
