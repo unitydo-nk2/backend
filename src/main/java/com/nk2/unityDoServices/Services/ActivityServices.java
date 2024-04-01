@@ -159,37 +159,36 @@ public class ActivityServices {
         return activityListDTOs;
     }
 
-    public List<ActivityCardSliderListDTO> getRecommendsActivity(Integer userId){
+    public List<ActivityCardSliderListDTO> getRecommendsActivity(HttpServletRequest httpServletRequest, Integer userId){
+        System.out.println("do getRecommendsActivity");
 
-        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
-        User user = userServices.findUserByEmail(email);
-        if (user != null) {
-            if (user.getId() != userId) {
+        if (httpServletRequest.isUserInRole("User")) {
+            String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+            User targetUser = userServices.findUserByEmail(email);
+            if (targetUser.getId() != userId) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The register email must be the same as user email");
+                        "this user is not belongs to you !");
             }
-            if (!user.getRole().equals("User")) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "Only user can register event");
-            }
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "user with does not exist !!!");
         }
 
         // URL to fetch data from
         String url = "http://172.26.0.3:5050/api/recommendActivities/"+userId;
+        System.out.println("fetch to "+url);
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
         // Fetch data from the URL and deserialize into a list of Activity objects
         ResponseEntity<ActivityReceiverDTO[]> response = restTemplate.getForEntity(url, ActivityReceiverDTO[].class);
+        System.out.println("response : "+response);
+
         List<ActivityReceiverDTO> activityList = Arrays.asList(response.getBody());
 
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
 
         for (ActivityReceiverDTO activity : activityList) {
+            System.out.println("activity : "+activity);
+
             Activity targetActivity = repository.findById(activity.getActivityId()).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
 
@@ -202,6 +201,7 @@ public class ActivityServices {
             }
             activityListDTOs.add(upComingActivity);
         }
+        System.out.println(activityListDTOs);
         return activityListDTOs;
     }
 

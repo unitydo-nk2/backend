@@ -59,8 +59,8 @@ public class ActivityController {
     }
 
     @GetMapping("/recommends/{userId}")
-    public List<ActivityCardSliderListDTO> getRecommendActivity(@PathVariable Integer userId) {
-        return activityServices.getRecommendsActivity(userId) ;
+    public List<ActivityCardSliderListDTO> getRecommendActivity(HttpServletRequest request,@PathVariable Integer userId) {
+        return activityServices.getRecommendsActivity(request, userId) ;
     }
 
     @GetMapping("/userRegistration")
