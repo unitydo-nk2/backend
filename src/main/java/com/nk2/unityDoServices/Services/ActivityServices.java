@@ -172,8 +172,8 @@ public class ActivityServices {
         }
 
         // URL to fetch data from
-//        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
-        String url = "http://localhost:5050/api/recommendActivities/"+targetUser.getId();
+        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
+//        String url = "http://localhost:5050/api/recommendActivities/"+targetUser.getId();
 
         System.out.println("fetch to "+url);
 
