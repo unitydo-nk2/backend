@@ -88,7 +88,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PATCH,"/api/activities/{id}","/api/activities/images/{id}","api/users/registration/{id}").hasAnyAuthority(Role.Admin.name(),Role.ActivityOwner.name())
                         .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAnyAuthority(Role.User.name())
                         .requestMatchers(HttpMethod.PATCH,"/api/users/{id}").hasAnyAuthority(Role.Admin.name(),Role.User.name())
-                        .requestMatchers(HttpMethod.GET,"api/activities/recommends","api/activities/favorite").hasAuthority(Role.User.name())
+                        .requestMatchers(HttpMethod.GET,"api/activities/recommends/{userId}","api/activities/favorite").hasAuthority(Role.User.name())
                         .requestMatchers(HttpMethod.GET,"api/users/list").hasAuthority(Role.Admin.name())
                         .anyRequest().authenticated()
                 );
