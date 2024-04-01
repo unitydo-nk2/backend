@@ -13,4 +13,3 @@ public interface FavoriteCategoryRepository extends JpaRepository<FavoriteCatego
             "WHERE f.userId = :userId ", nativeQuery = true)
     List<FavoriteCategory> findCategoryFavoriteByUserId(Integer userId);
 }
-0
