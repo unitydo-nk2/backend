@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.FileSystems;
 import java.util.List;
 
 @Component
@@ -29,10 +30,14 @@ public class RecommendationTask {
     public void generateCSV(){
         System.out.println("do task");
         List<ActivityWithCategory> activityList = activityWithCategoryRepository.findAll();
-        csvDownloadServices.generateActivityWithCategoryCSV(activityList,"../activityWithCategory.csv");
+        csvDownloadServices.generateActivityWithCategoryCSV(activityList, FileSystems.getDefault()
+                .getPath("")
+                .toAbsolutePath() +"/activityWithCategory.csv");
         System.out.println("activityWithCategory created");
         List<UserCategoryRanking> userCategoryRankings = userCategoryRankingRepository.findAll();
-        csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings,"../userCategoryRankings.csv");
+        csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings,FileSystems.getDefault()
+                .getPath("")
+                .toAbsolutePath()+"/userCategoryRankings.csv");
         System.out.println("userCategoryRankings created");
 
     }
