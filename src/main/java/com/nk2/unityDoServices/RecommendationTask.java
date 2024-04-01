@@ -33,12 +33,16 @@ public class RecommendationTask {
         csvDownloadServices.generateActivityWithCategoryCSV(activityList, FileSystems.getDefault()
                 .getPath("")
                 .toAbsolutePath() +"/activityWithCategory.csv");
-        System.out.println("activityWithCategory created");
+        System.out.println("activityWithCategory created @ "+FileSystems.getDefault()
+                .getPath("")
+                .toAbsolutePath() +"/activityWithCategory.csv");
         List<UserCategoryRanking> userCategoryRankings = userCategoryRankingRepository.findAll();
         csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings,FileSystems.getDefault()
                 .getPath("")
                 .toAbsolutePath()+"/userCategoryRankings.csv");
-        System.out.println("userCategoryRankings created");
+        System.out.println("userCategoryRankings created @ "+FileSystems.getDefault()
+                .getPath("")
+                .toAbsolutePath() +"/userCategoryRankings.csv");
 
     }
 }
