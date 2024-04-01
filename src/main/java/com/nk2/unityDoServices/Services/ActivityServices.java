@@ -172,7 +172,7 @@ public class ActivityServices {
         }
 
         // URL to fetch data from
-        String url = "http://172.26.0.3:5050/api/recommendActivities/"+userId;
+        String url = "http://172.26.0.2:5050/api/recommendActivities/"+userId;
         System.out.println("fetch to "+url);
 
         // Create a RestTemplate instance
