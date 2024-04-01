@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.FileSystems;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,12 @@ public class UserServices{
 
     @Autowired
     private MainCategoryRepository mainCategoryRepository;
+
+    @Autowired
+    UserCategoryRankingRepository userCategoryRankingRepository;
+
+    @Autowired
+    CSVDownloadServices csvDownloadServices;
 
     public UserDetailsDTO getUserByEmail() {
         System.out.println("getUserByEmail");
@@ -127,6 +134,10 @@ public class UserServices{
         }
         newUser.setEmail(user.getEmail().trim());
         userRepository.saveAndFlush(newUser);
+        List<UserCategoryRanking> userCategoryRankings = userCategoryRankingRepository.findAll();
+        csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings, FileSystems.getDefault()
+                .getPath("")
+                .toAbsolutePath()+"/userCategoryRankings.csv");
         return modelMapper.map(newUser, User.class);
     }
 
