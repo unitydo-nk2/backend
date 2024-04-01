@@ -159,20 +159,19 @@ public class ActivityServices {
         return activityListDTOs;
     }
 
-    public List<ActivityCardSliderListDTO> getRecommendsActivity(HttpServletRequest httpServletRequest, Integer userId){
+    public List<ActivityCardSliderListDTO> getRecommendsActivity(HttpServletRequest httpServletRequest){
         System.out.println("do getRecommendsActivity");
-
+        User targetUser = new User();
         if (httpServletRequest.isUserInRole("user")) {
             String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
-            User targetUser = userServices.findUserByEmail(email);
-            if (targetUser.getId() != userId) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "this user is not belongs to you !");
-            }
+            targetUser = userServices.findUserByEmail(email);
+        }else{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "only user can get recommends activities");
         }
 
         // URL to fetch data from
-        String url = "http://172.26.0.2:5050/api/recommendActivities/"+userId;
+        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
         System.out.println("fetch to "+url);
 
         // Create a RestTemplate instance

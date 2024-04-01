@@ -58,9 +58,9 @@ public class ActivityController {
         return activityServices.getSimilarActivity(activityId);
     }
 
-    @GetMapping("/recommends/{userId}")
-    public List<ActivityCardSliderListDTO> getRecommendActivity(HttpServletRequest request,@PathVariable Integer userId) {
-        return activityServices.getRecommendsActivity(request, userId) ;
+    @GetMapping("/recommends")
+    public List<ActivityCardSliderListDTO> getRecommendActivity(HttpServletRequest request) {
+        return activityServices.getRecommendsActivity(request) ;
     }
 
     @GetMapping("/userRegistration")
