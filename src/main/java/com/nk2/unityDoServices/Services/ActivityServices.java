@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -156,6 +159,52 @@ public class ActivityServices {
         return activityListDTOs;
     }
 
+    public List<ActivityCardSliderListDTO> getRecommendsActivity(Integer userId){
+
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User user = userServices.findUserByEmail(email);
+        if (user != null) {
+            if (user.getId() != userId) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The register email must be the same as user email");
+            }
+            if (!user.getRole().equals("User")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Only user can register event");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "user with does not exist !!!");
+        }
+
+        // URL to fetch data from
+        String url = "http://172.26.0.3:5050/api/recommendActivities/"+userId;
+
+        // Create a RestTemplate instance
+        RestTemplate restTemplate = new RestTemplate();
+
+        // Fetch data from the URL and deserialize into a list of Activity objects
+        ResponseEntity<ActivityReceiverDTO[]> response = restTemplate.getForEntity(url, ActivityReceiverDTO[].class);
+        List<ActivityReceiverDTO> activityList = Arrays.asList(response.getBody());
+
+        List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
+
+        for (ActivityReceiverDTO activity : activityList) {
+            Activity targetActivity = repository.findById(activity.getActivityId()).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
+
+            ActivityCardSliderListDTO upComingActivity = modelMapper.map(targetActivity, ActivityCardSliderListDTO.class);
+            List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
+            if (img.isEmpty()) {
+                upComingActivity.setImagePath(null);
+            } else {
+                upComingActivity.setImagePath(img.get(0).getImagepath());
+            }
+            activityListDTOs.add(upComingActivity);
+        }
+        return activityListDTOs;
+    }
+
     public List<ActivityCardSliderListDTO> getSimilarActivity(Integer activityId) {
         List<Activity> activityList = repository.findSimilarActivities(activityId);
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
@@ -189,11 +238,6 @@ public class ActivityServices {
         }
         return activityRecommendation;
     }
-
-//    public List<ActivityImageDTO> getActivityPoster() {
-//        List<Image> poster = imageRepository.findActivityPoster();
-//        return listMapper.mapList(poster, ActivityImageDTO.class, modelMapper);
-//    }
 
     public Instant convertDateTimeInstant(String dateTimeLocalString) {
         System.out.println("dateTimeLocalString = " + dateTimeLocalString);

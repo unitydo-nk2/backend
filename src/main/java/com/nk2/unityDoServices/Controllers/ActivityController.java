@@ -13,8 +13,11 @@ import com.nk2.unityDoServices.Services.UserServices;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -40,11 +43,6 @@ public class ActivityController {
         return activityServices.getActivityManagement(httpServletRequest);
     }
 
-//    @GetMapping("/poster")
-//    public List<ActivityImageDTO> getActivityPoster() {
-//        return activityServices.getActivityPoster();
-//    }
-
     @GetMapping("/popular")
     public List<PopularActivityDTO> getActivityPopularActivity() {
         return activityServices.getPopularActivity();
@@ -61,8 +59,8 @@ public class ActivityController {
     }
 
     @GetMapping("/recommends/{userId}")
-    public List<ActivityRecommendationDTO> getRecommendActivity(@PathVariable Integer userId) {
-        return activityServices.getRecommendedActivity(userId);
+    public List<ActivityCardSliderListDTO> getRecommendActivity(@PathVariable Integer userId) {
+        return activityServices.getRecommendsActivity(userId) ;
     }
 
     @GetMapping("/userRegistration")
