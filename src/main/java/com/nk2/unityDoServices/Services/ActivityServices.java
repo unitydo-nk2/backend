@@ -98,11 +98,11 @@ public class ActivityServices {
         User targetUser = userServices.findUserByEmail(email);
         List<Activity> activityList = new ArrayList<>();
 
-        if (targetUser.getRole().equals("ActivityOwner")) {
+        if (targetUser.getRole().equals("activityOwner")) {
             System.out.println("get activity as ActivityOwner");
             activityList = repository.findByActivityOwner(targetUser);
 
-        } else if (targetUser.getRole().equals("Admin")) {
+        } else if (targetUser.getRole().equals("admin")) {
             System.out.println("get activity as Admin");
             activityList = repository.findAll();
         }
@@ -162,7 +162,7 @@ public class ActivityServices {
     public List<ActivityCardSliderListDTO> getRecommendsActivity(HttpServletRequest httpServletRequest, Integer userId){
         System.out.println("do getRecommendsActivity");
 
-        if (httpServletRequest.isUserInRole("User")) {
+        if (httpServletRequest.isUserInRole("user")) {
             String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
             User targetUser = userServices.findUserByEmail(email);
             if (targetUser.getId() != userId) {
@@ -250,7 +250,7 @@ public class ActivityServices {
 
 
     public ActivityDTO update(HttpServletRequest httpServletRequest, Integer id, UpdateActivityDTO updateActivity, LocationDTO updateLocation) {
-        if (httpServletRequest.isUserInRole("User")) {
+        if (httpServletRequest.isUserInRole("user")) {
             String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
             User targetUser = userServices.findUserByEmail(email);
             if (targetUser.getId() != id) {
@@ -321,7 +321,7 @@ public class ActivityServices {
     }
 
     public Integer delete(HttpServletRequest httpServletRequest, Integer id) {
-        if (httpServletRequest.isUserInRole("ActivityOwner")) {
+        if (httpServletRequest.isUserInRole("activityOwner")) {
             User targetUser = userRepository.findActivityOwner(id);
             if (targetUser.getId() != id) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -351,7 +351,7 @@ public class ActivityServices {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The register email must be the same as user email");
             }
-            if (!user.getRole().equals("User")) {
+            if (!user.getRole().equals("user")) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "Only user can register event");
             }
@@ -406,11 +406,11 @@ public class ActivityServices {
         User targetUser = userServices.findUserByEmail(email);
         List<Object[]> activitiesQuery = new ArrayList<>();
 
-        if (targetUser.getRole().equals("ActivityOwner")) {
+        if (targetUser.getRole().equals("activityOwner")) {
             System.out.println("get activity as ActivityOwner");
             activitiesQuery = repository.FindActivityByStatusAndUserIdOwnedByActivityOwner(targetUser.getId());
 
-        } else if (targetUser.getRole().equals("Admin")) {
+        } else if (targetUser.getRole().equals("admin")) {
             System.out.println("get activity as Admin");
             activitiesQuery = repository.FindActivityWithRegisterAmount();
         }

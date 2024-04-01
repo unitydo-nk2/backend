@@ -92,7 +92,7 @@ public class UserServices{
     public User save(@Valid CreateNewUserDTO user) {
         System.out.println("role "+user.getRole());
         if(user.getRole()==null){
-            user.setRole("User");
+            user.setRole("user");
         }
         if(userRepository.existsByEmail(user.getEmail())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -148,7 +148,7 @@ public class UserServices{
         System.out.println("activity owner id is : "+activity.getActivityOwner().getId());
         System.out.println("this user id : "+targetUser.getId());
 
-        if (targetUser.getRole().equals("ActivityOwner")) {
+        if (targetUser.getRole().equals("activityOwner")) {
             if(activity.getActivityOwner().getId() != targetUser.getId()){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "this activity is not belongs to you !");
@@ -168,7 +168,7 @@ public class UserServices{
         User targetUser = findUserByEmail(email);
         Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "activity id "+activityId + " does not exist !!!"));
-        if (targetUser.getRole().equals("ActivityOwner")) {
+        if (targetUser.getRole().equals("activityOwner")) {
             if(activity.getActivityOwner().getId() != targetUser.getId()){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "this activity is not belongs to you !");
@@ -185,7 +185,7 @@ public class UserServices{
         User targetUser = findUserByEmail(email);
         Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "activity id "+activityId + " does not exist !!!"));
-        if (targetUser.getRole().equals("ActivityOwner")) {
+        if (targetUser.getRole().equals("activityOwner")) {
             if(activity.getActivityOwner().getId() != targetUser.getId()){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "this activity is not belongs to you !");
@@ -221,9 +221,9 @@ public class UserServices{
         User user = jwtService.getUserFromToken(jwtAuthenticationFilter.getJwtToken());
         System.out.println("user "+user.getId());
         System.out.println("user role "+user.getRole());
-        System.out.println("user in role user "+ user.getRole().equals("User"));
-        System.out.println("user in role activityOwner "+ user.getRole().equals("ActivityOwner"));
-        if(user.getRole().equals("User") || user.getRole().equals("ActivityOwner")){
+        System.out.println("user in role user "+ user.getRole().equals("user"));
+        System.out.println("user in role activityOwner "+ user.getRole().equals("activityOwner"));
+        if(user.getRole().equals("user") || user.getRole().equals("activityOwner")){
             System.out.println("user is null "+ user == null);
             System.out.println("userId "+userId);
             System.out.println("user.getId() "+user.getId());
@@ -259,7 +259,7 @@ public class UserServices{
     }
 
     public void validateIdBelong(HttpServletRequest httpServletRequest, Integer id) {
-        if(httpServletRequest.isUserInRole("ActivityOwner") || httpServletRequest.isUserInRole("User")){
+        if(httpServletRequest.isUserInRole("activityOwner") || httpServletRequest.isUserInRole("user")){
             String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
             User targetUser = findUserByEmail(email);
             if(targetUser.getId() != id){
@@ -275,12 +275,12 @@ public class UserServices{
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));
 
-        if (httpServletRequest.isUserInRole("ActivityOwner")) {
+        if (httpServletRequest.isUserInRole("activityOwner")) {
             List<Activity> activityList = activityRepository.findByActivityOwner(user);
             for (Activity activity : activityList) {
                 activityRepository.deleteById(activity.getId());
             }
-        } else if (httpServletRequest.isUserInRole("User")){
+        } else if (httpServletRequest.isUserInRole("user")){
             List<Registration> registrationList = registrationRepository.FindAllRegistrationFromUserId(id);
             for (Registration registration : registrationList) {
                 registrationRepository.deleteById(registration.getId());
@@ -316,7 +316,7 @@ public class UserServices{
     }
 
     public Registration updateRegistration(HttpServletRequest httpServletRequest, Integer id, String status) {
-        if(httpServletRequest.isUserInRole("User")){
+        if(httpServletRequest.isUserInRole("user")){
             String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
             User targetUser = findUserByEmail(email);
             if(targetUser.getId() != id){
