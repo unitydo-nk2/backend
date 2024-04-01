@@ -32,17 +32,17 @@ public class RecommendationTask {
         List<ActivityWithCategory> activityList = activityWithCategoryRepository.findAll();
         csvDownloadServices.generateActivityWithCategoryCSV(activityList, FileSystems.getDefault()
                 .getPath("")
-                .toAbsolutePath() +"/activityWithCategory.csv");
+                .toAbsolutePath() +"/files/activityWithCategory.csv");
         System.out.println("activityWithCategory created @ "+FileSystems.getDefault()
                 .getPath("")
-                .toAbsolutePath() +"/activityWithCategory.csv");
+                .toAbsolutePath() +"/files/activityWithCategory.csv");
         List<UserCategoryRanking> userCategoryRankings = userCategoryRankingRepository.findAll();
         csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings,FileSystems.getDefault()
                 .getPath("")
-                .toAbsolutePath()+"/userCategoryRankings.csv");
+                .toAbsolutePath()+"/files/userCategoryRankings.csv");
         System.out.println("userCategoryRankings created @ "+FileSystems.getDefault()
                 .getPath("")
-                .toAbsolutePath() +"/userCategoryRankings.csv");
+                .toAbsolutePath() +"/files/userCategoryRankings.csv");
 
     }
 }
