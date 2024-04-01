@@ -282,8 +282,12 @@ public class UserServices{
             }
         } else if (user.getRole().equals("user")){
             List<Registration> registrationList = registrationRepository.FindAllRegistrationFromUserId(id);
+            List<FavoriteCategory> categoryList = favoriteCategoryRepository.findCategoryFavoriteByUserId(id);
             for (Registration registration : registrationList) {
                 registrationRepository.deleteById(registration.getId());
+            }
+            for (FavoriteCategory category : categoryList) {
+                favoriteCategoryRepository.deleteById(category.getId());
             }
         }
 
