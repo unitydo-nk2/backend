@@ -33,7 +33,10 @@ public class Recommender {
 //                // Read activities data and merge based on mainCategoryId
 //                Iterable<CSVRecord> activitiesRecords = CSVFormat.DEFAULT.parse(activitiesReader);
 //                for (CSVRecord activityRecord : activitiesRecords) {
-//                    String activityId = activityRecord.get("activityId");
+//                    String activityId = activityRecord.get("activityId
+//
+//
+//                    ");
 //                    if (!userItemMatrix.containsKey(userId)) {
 //                        userItemMatrix.put(userId, new HashMap<>());
 //                    }
