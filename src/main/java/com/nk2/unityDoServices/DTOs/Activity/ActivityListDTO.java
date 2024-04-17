@@ -1,5 +1,6 @@
 package com.nk2.unityDoServices.DTOs.Activity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nk2.unityDoServices.Entities.Activity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -21,8 +23,10 @@ public class ActivityListDTO {
     private String category;
     private Integer mainCategoryId;
     private String mainCategory;
-    private Instant activityDate;
-    private Instant activityEndDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime activityDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime activityEndDate;
     private String imagePath;
 
     public ActivityListDTO(Activity activity) {

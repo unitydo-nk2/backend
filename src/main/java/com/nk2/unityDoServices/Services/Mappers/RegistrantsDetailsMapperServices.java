@@ -23,8 +23,8 @@ public class RegistrantsDetailsMapperServices {
         dto.setSurName((String) result[4]);
         dto.setNickName((String) result[5]);
         dto.setGender((String) result[7]);
-        dto.setStatus((String) result[20]);
-        dto.setRegistrationId(((Number) result[21]).intValue());
+        dto.setStatus((String) result[21]);
+        dto.setRegistrationId(((Number) result[22]).intValue());
         dto.setEmail((String) result[6]);
         dto.setDateOfBirth(((Date) result[8]).toLocalDate());
 //        dto.setDateOfBirth(((Timestamp) result[8]).toInstant().atZone(ZoneId.systemDefault()).toLocalDate());

@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class AnnouncementDateValidatorConstraint implements ConstraintValidator<AnnouncementDateValidator, CreateNewActivityDTO> {
 
@@ -22,11 +23,11 @@ public class AnnouncementDateValidatorConstraint implements ConstraintValidator<
     public boolean isValid(CreateNewActivityDTO activity, ConstraintValidatorContext cxt) {
         try {
             System.out.println("do ActivityDateValidatorConstraint");
-            Instant activityDate = activityServices.convertDateTimeInstant(activity.getActivityDate());
+            LocalDateTime activityDate = activityServices.convertDateTime(activity.getActivityDate());
             System.out.println("activityDate = "+activityDate);
-            Instant activityEndDate = activityServices.convertDateTimeInstant(activity.getActivityEndDate());
+            LocalDateTime activityEndDate = activityServices.convertDateTime(activity.getActivityEndDate());
             System.out.println("activityEndDate = "+activityEndDate);
-            Instant announcementDate = activityServices.convertDateTimeInstant(activity.getAnnouncementDate());
+            LocalDateTime announcementDate = activityServices.convertDateTime(activity.getAnnouncementDate());
             System.out.println("announcementDate = "+activityEndDate);
             if (announcementDate.isAfter(activityDate) || announcementDate.isAfter(activityEndDate)) {
                 return false;

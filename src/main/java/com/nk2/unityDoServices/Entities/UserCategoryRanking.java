@@ -13,6 +13,7 @@ import lombok.Setter;
 public class UserCategoryRanking {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "favoriteCategoryId")
     private Long favoriteCategoryId;
 

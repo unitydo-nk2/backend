@@ -5,6 +5,7 @@ import com.nk2.unityDoServices.Configs.JwtService;
 import com.nk2.unityDoServices.DTOs.Activity.ActivityWithStatusDTO;
 import com.nk2.unityDoServices.DTOs.Activity.RegisteredActivityDTO;
 import com.nk2.unityDoServices.DTOs.Category.CategoryDTO;
+import com.nk2.unityDoServices.DTOs.Category.FavoriteCategoryDTO;
 import com.nk2.unityDoServices.DTOs.Category.SetFavoriteCategoryDTO;
 import com.nk2.unityDoServices.DTOs.User.*;
 import com.nk2.unityDoServices.Entities.*;
@@ -16,17 +17,21 @@ import com.nk2.unityDoServices.Utils.ListMapper;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.FileSystems;
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,17 +80,17 @@ public class UserServices{
     private MainCategoryRepository mainCategoryRepository;
 
     @Autowired
-    UserCategoryRankingRepository userCategoryRankingRepository;
+    private ActivityReviewRepository activityReviewRepository;
 
     @Autowired
-    CSVDownloadServices csvDownloadServices;
+    private UserCategoryRankingRepository userCategoryRankingRepository;
+
+    @Autowired
+    private CSVDownloadServices csvDownloadServices;
 
     public UserDetailsDTO getUserByEmail() {
-        System.out.println("getUserByEmail");
         String token  = jwtAuthenticationFilter.getJwtToken();
-        System.out.println("token "+token);
         String email = jwtService.extractUsername(token);
-        System.out.println("email "+email);
         User user = userRepository.findUserByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "user "+ email + " does not exist !!!"));
         return modelMapper.map(user, UserDetailsDTO.class);
@@ -96,53 +101,8 @@ public class UserServices{
                 "user "+ email + " does not exist !!!"));
     }
 
-    public User save(@Valid CreateNewUserDTO user) {
-        System.out.println("role "+user.getRole());
-        if(user.getRole()==null){
-            user.setRole("user");
-        }
-        if(userRepository.existsByEmail(user.getEmail())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "This email have been used!");
-        }
-        Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
-        char[] password = user.getPassword().toCharArray();
-        User newUser = modelMapper.map(user, User.class);
-        newUser.setName(user.getName());
-        newUser.setUsername(user.getEmail().trim());
-        newUser.setSurName(user.getSurName());
-        newUser.setNickName(user.getNickName());
-        newUser.setEmail(user.getEmail());
-        newUser.setGender(user.getGender());
-        newUser.setDateOfBirth(user.getDateOfBirth());
-        newUser.setReligion(user.getReligion());
-        newUser.setTelephoneNumber(user.getTelephoneNumber());
-        newUser.setAddress(user.getAddress());
-        newUser.setRole(user.getRole());
-        newUser.setEmergencyPhoneNumber(user.getEmergencyPhoneNumber());
-        newUser.setProfileImg(user.getProfileImg());
-        newUser.setLine(user.getLine());
-        newUser.setInstagram(user.getInstagram());
-        newUser.setX(user.getX());
-        newUser.setCreateTime(Instant.now());
-        newUser.setUpdateTime(Instant.now());
-        try {
-            String hash = argon2.hash(2, 16, 1, password);
-            newUser.setPassword(hash);
-        } finally {
-            argon2.wipeArray(password);
-        }
-        newUser.setEmail(user.getEmail().trim());
-        userRepository.saveAndFlush(newUser);
-        List<UserCategoryRanking> userCategoryRankings = userCategoryRankingRepository.findAll();
-        csvDownloadServices.generateAUserCategoryRankingCSV(userCategoryRankings, FileSystems.getDefault()
-                .getPath("")
-                .toAbsolutePath()+"/userCategoryRankings.csv");
-        return modelMapper.map(newUser, User.class);
-    }
-
     public List<UserDTO> getUserList(HttpServletRequest httpServletRequest) {
-        List<User> userList = userRepository.findAll();
+        List<User> userList = userRepository.findAllActiveUser();
         return listMapper.mapList(userList, UserDTO.class, modelMapper);
     }
 
@@ -156,9 +116,6 @@ public class UserServices{
         Activity activity = activityRepository.findById(registration.getActivityId().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "activity id "+activityId + " does not exist !!!"));
 
-        System.out.println("activity owner id is : "+activity.getActivityOwner().getId());
-        System.out.println("this user id : "+targetUser.getId());
-
         if (targetUser.getRole().equals("activityOwner")) {
             if(activity.getActivityOwner().getId() != targetUser.getId()){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -166,13 +123,26 @@ public class UserServices{
             }
         }
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromRegistrationId(activityId);
-        System.out.println("userList : "+userList);
         List<RegistrantDetailsDTO> registrantList = registrantsDetailsMapperServices.mapToRegistrantsDetailsDTO(userList);
         return registrantList.stream()
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no registration id :" + activityId));
     }
+//    public List<Object[]> getUserRegisteredActivity(Integer activityId) {
+//        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+//        User targetUser = findUserByEmail(email);
+//        Activity activity = activityRepository.findById(activityId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+//                "activity id "+activityId + " does not exist !!!"));
+//        if (targetUser.getRole().equals("activityOwner")) {
+//            if(activity.getActivityOwner().getId() != targetUser.getId()){
+//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                        "this activity is not belongs to you !");
+//            }
+//        }
+//        List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
+//        return userList;
+//    }
 
     public List<RegistrantDTO> getUserRegisteredActivity(Integer activityId) {
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
@@ -186,7 +156,6 @@ public class UserServices{
             }
         }
         List<Object[]> userList = userRepository.findRegisteredUserWithStatusFromActivityId(activityId);
-        System.out.println("userList : "+userList);
         List<RegistrantDTO> registrantList = userMapperServices.mapToRegistrantDTO(userList);
         return registrantList;
     }
@@ -220,6 +189,7 @@ public class UserServices{
         User user = findUserByEmail(favoriteCategory.getUserEmail());
         MainCategory mainCategory = mainCategoryRepository.findById(favoriteCategory.getMainCategoryId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "category id "+favoriteCategory.getMainCategoryId() + " does not exist !!!"));
+
         FavoriteCategory userFavoriteCategory = new FavoriteCategory();
         userFavoriteCategory.setUserId(user);
         userFavoriteCategory.setMainCategoryId(mainCategory);
@@ -227,18 +197,30 @@ public class UserServices{
         return favoriteCategoryRepository.saveAndFlush(userFavoriteCategory);
     }
 
+    public FavoriteCategory updateUserFavoriteCategory(HttpServletRequest httpServletRequest, Integer id, FavoriteCategoryDTO favoriteCategory) {
+        FavoriteCategory targetFavoriteCategory = favoriteCategoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                id + " does not exist !!!"));
+        User user = targetFavoriteCategory.getUserId();
+        String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
+        User targetUser = findUserByEmail(email);
+        if(!user.getId().equals(targetUser.getId())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "this favorite category is not belongs to you !");
+        }
+        MainCategory mainCategory = mainCategoryRepository.findById(favoriteCategory.getMainCategoryId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "category id "+favoriteCategory.getMainCategoryId() + " does not exist !!!"));
+        FavoriteCategory updatedFavoriteCategory = favoriteCategoryRepository.findById(id).map(f -> {
+            f.setMainCategoryId(mainCategory);
+            return  f;
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                id + " does not exist !!!"));
+        favoriteCategoryRepository.saveAndFlush(updatedFavoriteCategory);
+        return updatedFavoriteCategory;
+    }
+
     public UserDTO getUserById(HttpServletRequest httpServletRequest, Integer userId) {
-        System.out.println("getUserById");
         User user = jwtService.getUserFromToken(jwtAuthenticationFilter.getJwtToken());
-        System.out.println("user "+user.getId());
-        System.out.println("user role "+user.getRole());
-        System.out.println("user in role user "+ user.getRole().equals("user"));
-        System.out.println("user in role activityOwner "+ user.getRole().equals("activityOwner"));
         if(user.getRole().equals("user") || user.getRole().equals("activityOwner")){
-            System.out.println("user is null "+ user == null);
-            System.out.println("userId "+userId);
-            System.out.println("user.getId() "+user.getId());
-            System.out.println(userId != user.getId());
             if(userId != user.getId()){
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot get users which you didn't own");
             }
@@ -273,7 +255,7 @@ public class UserServices{
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User targetUser = findUserByEmail(email);
         if(targetUser.getRole().equals("activityOwner") || targetUser.getRole().equals("user")){
-            if(targetUser.getId() != id){
+            if(!id.equals(targetUser.getId().intValue())){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "this user is not belongs to you !");
             }
@@ -289,20 +271,18 @@ public class UserServices{
         if (user.getRole().equals("activityOwner")) {
             List<Activity> activityList = activityRepository.findByActivityOwner(user);
             for (Activity activity : activityList) {
-                activityRepository.deleteById(activity.getId());
+                activity.setActivityStatus("Inactive");
+                activityRepository.saveAndFlush(activity);
             }
         } else if (user.getRole().equals("user")){
             List<Registration> registrationList = registrationRepository.FindAllRegistrationFromUserId(id);
-            List<FavoriteCategory> categoryList = favoriteCategoryRepository.findCategoryFavoriteByUserId(id);
             for (Registration registration : registrationList) {
-                registrationRepository.deleteById(registration.getId());
-            }
-            for (FavoriteCategory category : categoryList) {
-                favoriteCategoryRepository.deleteById(category.getId());
+                registration.setStatus("activityInactive");
+                registrationRepository.saveAndFlush(registration);
             }
         }
-
-        userRepository.deleteById(id);
+        user.setStatus("Inactive");
+        userRepository.saveAndFlush(user);
         return id;
     }
 
@@ -322,7 +302,7 @@ public class UserServices{
             targetUser.setLine(updateUser.getLine());
             targetUser.setInstagram(updateUser.getInstagram());
             targetUser.setX(updateUser.getX());
-            targetUser.setUpdateTime(Instant.now());
+            targetUser.setUpdateTime(LocalDateTime.now());
             return  targetUser;
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 id + " does not exist !!!"));

@@ -54,6 +54,7 @@ public class UserController {
         return userServices.delete(httpServletRequest, id);
     }
 
+
     @PatchMapping("/registration/{id}")
     public Registration updateUserRegistration(HttpServletRequest httpServletRequest,
                                                @Valid @RequestPart("status") String status

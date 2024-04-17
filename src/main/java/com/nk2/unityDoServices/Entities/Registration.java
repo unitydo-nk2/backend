@@ -2,7 +2,7 @@ package com.nk2.unityDoServices.Entities;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Table(name = "registration", indexes = {
         @Index(name = "fk_Registration_Activity1_idx", columnList = "activityId"),
@@ -22,7 +22,7 @@ public class Registration {
     private User userId;
 
     @Column(name = "registrationDate", nullable = false)
-    private Instant registrationDate;
+    private LocalDateTime registrationDate;
 
     @Lob
     @Column(name = "status", nullable = false)
@@ -48,11 +48,11 @@ public class Registration {
         this.status = status;
     }
 
-    public Instant getRegistrationDate() {
+    public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
 
-    public void setRegistrationDate(Instant registrationDate) {
+    public void setRegistrationDate(LocalDateTime registrationDate) {
         this.registrationDate = registrationDate;
     }
 

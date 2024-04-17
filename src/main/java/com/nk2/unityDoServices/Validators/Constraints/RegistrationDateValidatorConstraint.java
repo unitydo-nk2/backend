@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class RegistrationDateValidatorConstraint implements ConstraintValidator<RegistrationDateValidator, CreateNewActivityDTO> {
 
@@ -22,15 +23,15 @@ public class RegistrationDateValidatorConstraint implements ConstraintValidator<
     public boolean isValid(CreateNewActivityDTO activity, ConstraintValidatorContext cxt) {
         try {
             System.out.println("do ActivityDateValidatorConstraint");
-            Instant activityDate = activityServices.convertDateTimeInstant(activity.getActivityDate());
+            LocalDateTime activityDate = activityServices.convertDateTime(activity.getActivityDate());
             System.out.println("activityDate = "+activityDate);
-            Instant activityEndDate = activityServices.convertDateTimeInstant(activity.getActivityEndDate());
+            LocalDateTime activityEndDate = activityServices.convertDateTime(activity.getActivityEndDate());
             System.out.println("activityEndDate = "+activityEndDate);
-            Instant announcementDate = activityServices.convertDateTimeInstant(activity.getAnnouncementDate());
+            LocalDateTime announcementDate = activityServices.convertDateTime(activity.getAnnouncementDate());
             System.out.println("announcementDate = "+activityEndDate);
-            Instant registrationDate = activityServices.convertDateTimeInstant(activity.getRegisterStartDate());
+            LocalDateTime registrationDate = activityServices.convertDateTime(activity.getRegisterStartDate());
             System.out.println("registrationDate = "+registrationDate);
-            Instant registrationEndDate = activityServices.convertDateTimeInstant(activity.getRegisterEndDate());
+            LocalDateTime registrationEndDate = activityServices.convertDateTime(activity.getRegisterEndDate());
             System.out.println("registrationEndDate = "+registrationEndDate);
             if (registrationDate.isAfter(registrationEndDate) || registrationDate.isAfter(announcementDate) || registrationDate.isAfter(activityDate) || registrationDate.isAfter(activityEndDate)) {
                 return false;

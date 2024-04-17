@@ -2,7 +2,7 @@ package com.nk2.unityDoServices.Entities;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Table(name = "activity", indexes = {
         @Index(name = "fk_Activity_location1_idx", columnList = "locationId"),
@@ -30,16 +30,16 @@ public class Activity {
     private String activityDescription;
 
     @Column(name = "activityDate", nullable = false)
-    private Instant activityDate;
+    private LocalDateTime activityDate;
 
     @Column(name = "activityEndDate", nullable = false)
-    private Instant activityEndDate;
+    private LocalDateTime activityEndDate;
 
     @Column(name = "registerStartDate", nullable = false)
-    private Instant registerStartDate;
+    private LocalDateTime registerStartDate;
 
     @Column(name = "registerEndDate", nullable = false)
-    private Instant registerEndDate;
+    private LocalDateTime registerEndDate;
 
     @Column(name = "amount", nullable = false)
     private Integer amount;
@@ -49,7 +49,7 @@ public class Activity {
     private Location locationId;
 
     @Column(name = "announcementDate", nullable = false)
-    private Instant announcementDate;
+    private LocalDateTime announcementDate;
 
     @Lob
     @Column(name = "activityStatus", nullable = false)
@@ -66,10 +66,10 @@ public class Activity {
     private Category categoryId;
 
     @Column(name = "lastUpdate", nullable = false)
-    private Instant lastUpdate;
+    private LocalDateTime lastUpdate;
 
     @Column(name = "createTime", nullable = false)
-    private Instant createTime;
+    private LocalDateTime createTime;
 
     @Lob
     @Column(name = "activityFormat", nullable = false)
@@ -83,19 +83,19 @@ public class Activity {
         this.activityFormat = activityFormat;
     }
 
-    public Instant getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Instant createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Instant getLastUpdate() {
+    public LocalDateTime getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Instant lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
@@ -131,11 +131,11 @@ public class Activity {
         this.activityStatus = activityStatus;
     }
 
-    public Instant getAnnouncementDate() {
+    public LocalDateTime getAnnouncementDate() {
         return announcementDate;
     }
 
-    public void setAnnouncementDate(Instant announcementDate) {
+    public void setAnnouncementDate(LocalDateTime announcementDate) {
         this.announcementDate = announcementDate;
     }
 
@@ -155,35 +155,35 @@ public class Activity {
         this.amount = amount;
     }
 
-    public Instant getRegisterEndDate() {
+    public LocalDateTime getRegisterEndDate() {
         return registerEndDate;
     }
 
-    public void setRegisterEndDate(Instant registerEndDate) {
+    public void setRegisterEndDate(LocalDateTime registerEndDate) {
         this.registerEndDate = registerEndDate;
     }
 
-    public Instant getRegisterStartDate() {
+    public LocalDateTime getRegisterStartDate() {
         return registerStartDate;
     }
 
-    public void setRegisterStartDate(Instant registerStartDate) {
+    public void setRegisterStartDate(LocalDateTime registerStartDate) {
         this.registerStartDate = registerStartDate;
     }
 
-    public Instant getActivityEndDate() {
+    public LocalDateTime getActivityEndDate() {
         return activityEndDate;
     }
 
-    public void setActivityEndDate(Instant activityEndDate) {
+    public void setActivityEndDate(LocalDateTime activityEndDate) {
         this.activityEndDate = activityEndDate;
     }
 
-    public Instant getActivityDate() {
+    public LocalDateTime getActivityDate() {
         return activityDate;
     }
 
-    public void setActivityDate(Instant activityDate) {
+    public void setActivityDate(LocalDateTime activityDate) {
         this.activityDate = activityDate;
     }
 

@@ -46,7 +46,7 @@ public class SecurityConfiguration {
     private static final String[] GUEST_GET_AVAILABLE = {
             "/api/activities/list", "/api/activities/poster", "/api/activities/popular","/api/activities/comingSoon",
             "/api/activities/{activityId}", "/api/activities/{activityId}/images", "/api/categories/**",
-            "/api/tracks/{activityId}","/api/activities/similar/{activityId}","/api/test"
+            "/api/tracks/{activityId}","/api/activities/similar/{activityId}","/api/test","/api/activities/review/{activityId}"
     };
 
     final JwtEntryPoint jwtEntryPoint;
@@ -55,7 +55,6 @@ public class SecurityConfiguration {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        System.out.println("do cors ConfigurationSource");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOriginPattern("*");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -68,7 +67,6 @@ public class SecurityConfiguration {
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        System.out.println("do filter chain");
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -79,16 +77,17 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST,"/api/tracks/{activityId}").permitAll()
                         .requestMatchers(HttpMethod.GET,GUEST_GET_AVAILABLE).permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/activities/management","/api/activities/userRegistration","/api/activities/registration/{activityId}"
-                                ,"api/users/{id}/activities","api/users/registration/{id}","/api/users/{activityId}/registrants").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
+                                ,"/api/users/{id}/activities","/api/users/registration/{id}","/api/users/{activityId}/registrants").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
                         .requestMatchers(HttpMethod.POST,"/api/tracks/favorite").hasAnyAuthority(Role.user.name())
-                        .requestMatchers(HttpMethod.PATCH,"/api/tracks/unFavorite/{favoriteId}").hasAnyAuthority(Role.user.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/tracks/unFavorite/{favoriteId}","api/categories/favoriteCategory/{id}","/api/activities/review/{registrationId}").hasAnyAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name(),Role.user.name())
                         .requestMatchers(HttpMethod.POST,"/api/activities","/api/activities/images").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
                         .requestMatchers(HttpMethod.DELETE,"/api/activities/{id}","/api/users/{id}").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
                         .requestMatchers(HttpMethod.PATCH,"/api/activities/{id}","/api/activities/images/{id}","/api/users/registration/{id}").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
-                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration").hasAnyAuthority(Role.user.name())
+                        .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration","/api/auth/**").hasAnyAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.PATCH,"/api/users/{id}").hasAnyAuthority(Role.admin.name(),Role.user.name())
-                        .requestMatchers(HttpMethod.GET,"/api/activities/recommends","/api/activities/favorite").hasAuthority(Role.user.name())
+                        .requestMatchers(HttpMethod.PATCH,"/api/activities/updateToDone/{id}").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
+                        .requestMatchers(HttpMethod.GET,"/api/activities/recommends","/api/activities/favorite","/api/categories/favorite").hasAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.GET,"/api/users/list").hasAuthority(Role.admin.name())
                         .anyRequest().authenticated()
                 );
@@ -133,7 +132,7 @@ public class SecurityConfiguration {
 
 
     @Bean
-    public Argon2PasswordEncoder argaon2PasswordEncoder() {
+    public Argon2PasswordEncoder argon2PasswordEncoder() {
         return new Argon2PasswordEncoder(16, 29, 1, 16, 2);
     }
 

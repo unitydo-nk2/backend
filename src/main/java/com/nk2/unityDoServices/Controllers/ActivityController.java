@@ -4,7 +4,9 @@ import com.nk2.unityDoServices.DTOs.Activity.*;
 import com.nk2.unityDoServices.DTOs.Image.CreateNewImageDTO;
 import com.nk2.unityDoServices.DTOs.Image.ImageDTO;
 import com.nk2.unityDoServices.DTOs.Location.LocationDTO;
+import com.nk2.unityDoServices.DTOs.Activity.ActivityReviewDTO;
 import com.nk2.unityDoServices.DTOs.User.RegistrantDTO;
+import com.nk2.unityDoServices.Entities.Activity;
 import com.nk2.unityDoServices.Entities.Image;
 import com.nk2.unityDoServices.Entities.Registration;
 import com.nk2.unityDoServices.Services.ActivityServices;
@@ -13,11 +15,8 @@ import com.nk2.unityDoServices.Services.UserServices;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -63,6 +62,11 @@ public class ActivityController {
         return activityServices.getRecommendsActivity(request) ;
     }
 
+    @GetMapping("/personalActivity")
+    public List<ActivityCardSliderListDTO> getPersonalRecommendActivity(HttpServletRequest request) {
+        return activityServices.getPersonalRecommendActivity(request) ;
+    }
+
     @GetMapping("/userRegistration")
     public List<ActivityWithRegistrationNumberDTO> getActivityWithRegistrationNumber() {
         return activityServices.getActivityRegistrationNumberDTO();
@@ -84,8 +88,13 @@ public class ActivityController {
     }
 
     @PostMapping("/{activityId}/registration")
-    public Registration createActivity(HttpServletRequest request, @Valid @RequestBody Integer userId, @PathVariable Integer activityId) {
+    public Registration createActivityRegistration(HttpServletRequest request, @Valid @RequestBody Integer userId, @PathVariable Integer activityId) {
         return activityServices.registerActivity(request, userId, activityId);
+    }
+
+    @GetMapping("/favorite")
+    public List<ActivityListDTO> getActivityFavorite() {
+        return activityServices.getActivityFavorite();
     }
 
     @GetMapping("/{activityId}/registrants")
@@ -93,9 +102,9 @@ public class ActivityController {
         return userServices.getUserRegisteredActivity(activityId);
     }
 
-    @GetMapping("/favorite")
-    public List<ActivityListDTO> getActivityFavorite() {
-        return activityServices.getActivityFavorite();
+    @GetMapping("/review/{activityId}")
+    public List<ActivityReviewListDTO> getActivityReviews(@PathVariable Integer activityId) {
+        return activityServices.getActivityReviews(activityId);
     }
 
 //    @GetMapping("/{activityId}/registrants")
@@ -115,6 +124,16 @@ public class ActivityController {
         return activityServices.save(activity, location);
     }
 
+    @PostMapping("/review/{activityId}")
+    public ActivityReviewDTO reviewActivity(HttpServletRequest httpServletRequest, @PathVariable Integer activityId, @RequestPart("review") ActivityReviewDTO review) {
+        return activityServices.reviewActivity(activityId,review);
+    }
+
+    @PatchMapping("/review/{activityReviewId}")
+    public ActivityReviewDTO updateActivityReview(@PathVariable Integer activityReviewId,@Valid @RequestPart("review") ActivityReviewDTO review) {
+        return activityServices.updateReviewActivity(activityReviewId,review);
+    }
+
     @PostMapping("/images")
     public Image imageUpload(@Valid @RequestPart("image") CreateNewImageDTO image) {
         return imageServices.save(image);
@@ -124,6 +143,11 @@ public class ActivityController {
     public Image updateImageUpload(@Valid @RequestPart("updateImage") String updatePath
             , @PathVariable Integer id) {
         return imageServices.update(id, updatePath);
+    }
+
+    @PatchMapping("/updateToDone/{id}")
+    public Activity updateActivityToDone(@PathVariable Integer id) {
+        return activityServices.updateActivityToDone(id);
     }
 
     @PatchMapping("/{id}")

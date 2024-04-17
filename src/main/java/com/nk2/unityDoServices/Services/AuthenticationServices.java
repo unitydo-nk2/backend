@@ -1,6 +1,7 @@
 package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.Configs.JwtService;
+import com.nk2.unityDoServices.DTOs.User.CreateNewUserDTO;
 import com.nk2.unityDoServices.DTOs.User.UserLoginDTO;
 import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Models.ErrorClass;
@@ -8,6 +9,8 @@ import com.nk2.unityDoServices.Models.JwtResponse;
 import com.nk2.unityDoServices.Models.Response;
 import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Utils.ListMapper;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +44,7 @@ public class AuthenticationServices {
     @Autowired
     private UserDetailsService userDetailsService;
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
 
@@ -72,6 +76,51 @@ public class AuthenticationServices {
     }else{
         throw new ResponseStatusException(HttpStatus.NO_CONTENT, "A user with the specified email DOES NOT exist");
     }
+    }
+
+    public ResponseEntity save(@Valid CreateNewUserDTO user, HttpServletResponse response,
+                               HttpServletRequest request) throws Exception{
+        if(user.getRole()==null){
+            user.setRole("user");
+        }
+        if(userRepository.existsByEmail(user.getEmail())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "This email have been used!");
+        }
+        Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 16, 29);
+        char[] password = user.getPassword().toCharArray();
+        User newUser = modelMapper.map(user, User.class);
+        newUser.setName(user.getName());
+        newUser.setUsername(user.getEmail().trim());
+        newUser.setSurName(user.getSurName());
+        newUser.setNickName(user.getNickName());
+        newUser.setEmail(user.getEmail());
+        newUser.setGender(user.getGender());
+        newUser.setDateOfBirth(user.getDateOfBirth());
+        newUser.setReligion(user.getReligion());
+        newUser.setTelephoneNumber(user.getTelephoneNumber());
+        newUser.setAddress(user.getAddress());
+        newUser.setRole(user.getRole());
+        newUser.setEmergencyPhoneNumber(user.getEmergencyPhoneNumber());
+        newUser.setProfileImg(user.getProfileImg());
+        newUser.setLine(user.getLine());
+        newUser.setInstagram(user.getInstagram());
+        newUser.setX(user.getX());
+        newUser.setCreateTime(LocalDateTime.now());
+        newUser.setUpdateTime(LocalDateTime.now());
+        newUser.setStatus("Active");
+        try {
+            String hash = argon2.hash(2, 16, 1, password);
+            newUser.setPassword(hash);
+        } finally {
+            argon2.wipeArray(password);
+        }
+        newUser.setEmail(user.getEmail().trim());
+        userRepository.saveAndFlush(newUser);
+        UserLoginDTO userLogin = new UserLoginDTO();
+        userLogin.setEmail(user.getEmail());
+        userLogin.setPassword(user.getPassword());
+        return login(userLogin,response,request);
     }
 
 

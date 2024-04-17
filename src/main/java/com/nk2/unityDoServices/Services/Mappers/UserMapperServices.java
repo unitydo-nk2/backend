@@ -4,6 +4,7 @@ import com.nk2.unityDoServices.DTOs.User.RegistrantDTO;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +23,9 @@ public class UserMapperServices {
         dto.setName((String) result[3]);
         dto.setSurName((String) result[4]);
         dto.setGender((String) result[7]);
-        dto.setStatus((String) result[20]);
-        dto.setRegistrationDate(((Timestamp) result[22]).toInstant());
-        dto.setRegistrationId(((Number) result[21]).intValue());
+        dto.setStatus((String) result[21]);
+        dto.setRegistrationDate(((Timestamp) result[23]).toLocalDateTime());
+        dto.setRegistrationId(((Number) result[22]).intValue());
         return dto;
     }
 }

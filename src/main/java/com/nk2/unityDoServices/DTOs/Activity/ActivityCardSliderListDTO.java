@@ -1,12 +1,13 @@
 package com.nk2.unityDoServices.DTOs.Activity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nk2.unityDoServices.Entities.Activity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -21,7 +22,8 @@ public class ActivityCardSliderListDTO {
     private String mainCategory;
     private String location;
     private String activityDescription;
-    private Instant activityDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime activityDate;
     private String imagePath;
 
     public ActivityCardSliderListDTO(Activity activity){

@@ -10,6 +10,7 @@ import java.util.List;
 public interface FavoriteCategoryRepository extends JpaRepository<FavoriteCategory,Integer> {
     @Query(value="SELECT f.* " +
             "FROM favoriteCategory f " +
-            "WHERE f.userId = :userId ", nativeQuery = true)
+            "WHERE f.userId = :userId " +
+            "ORDER BY f.categoryRank ASC ", nativeQuery = true)
     List<FavoriteCategory> findCategoryFavoriteByUserId(Integer userId);
 }

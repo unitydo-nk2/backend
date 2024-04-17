@@ -17,6 +17,9 @@ public interface RegistrationRepository extends JpaRepository<Registration,Integ
     @Query(value = "SELECT r.* from registration r WHERE r.activityId = :activity", nativeQuery = true)
     List<Registration> FindAllRegistrationFromActivityId(Integer activity);
 
+    @Query(value = "SELECT r.* from registration r WHERE r.activityId = :activity AND r.status != 'declined'", nativeQuery = true)
+    List<Registration> FindRegistrationFromActivityId(Integer activity);
+
     @Query(value = "SELECT r.* from registration r WHERE r.activityId = :activityId AND r.status = :status", nativeQuery = true)
     List<Registration> FindAllActivityRegistrationByStatus(Integer activityId, String status);
 }

@@ -2,19 +2,18 @@ package com.nk2.unityDoServices.Services;
 
 import com.nk2.unityDoServices.DTOs.Category.AllCategoryDTO;
 import com.nk2.unityDoServices.DTOs.Category.CategoryDTO;
+import com.nk2.unityDoServices.DTOs.Category.FavoriteCategoryDTO;
+import com.nk2.unityDoServices.DTOs.User.UserDetailsDTO;
 import com.nk2.unityDoServices.Entities.Category;
+import com.nk2.unityDoServices.Entities.FavoriteCategory;
 import com.nk2.unityDoServices.Entities.MainCategory;
-import com.nk2.unityDoServices.Entities.User;
 import com.nk2.unityDoServices.Repositories.CategoryRepository;
+import com.nk2.unityDoServices.Repositories.FavoriteCategoryRepository;
 import com.nk2.unityDoServices.Repositories.MainCategoryRepository;
-import com.nk2.unityDoServices.Repositories.UserRepository;
 import com.nk2.unityDoServices.Utils.ListMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -22,6 +21,9 @@ import java.util.List;
 public class CategoryServices {
     @Autowired
     MainCategoryRepository mainCategoryRepository;
+
+    @Autowired
+    FavoriteCategoryRepository favoriteCategoryRepository;
 
     @Autowired
     CategoryRepository categoryRepository;
@@ -47,9 +49,13 @@ public class CategoryServices {
         return  listMapper.mapList(categoryList, AllCategoryDTO.class, modelMapper);
     }
 
-    public List<CategoryDTO> getUserCategoriesFavorite(HttpServletRequest request, Integer userId) {
-        userServices.validateIdBelong(request,userId);
-        List<Category> categoryList = categoryRepository.findActivityFavoriteByUserId(userId);
-        return  listMapper.mapList(categoryList, CategoryDTO.class, modelMapper);
+    public List<FavoriteCategoryDTO> getUserCategoriesFavorite() {
+        UserDetailsDTO user = userServices.getUserByEmail();
+        System.out.println("find fav category of : "+ user.getUserId());
+        List<FavoriteCategory> categoryList = favoriteCategoryRepository.findCategoryFavoriteByUserId(user.getUserId());
+        return  listMapper.mapList(categoryList, FavoriteCategoryDTO.class, modelMapper);
     }
+
+
+
 }

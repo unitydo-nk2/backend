@@ -5,8 +5,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +51,7 @@ public class User implements UserDetails {
     @Column(name = "address", nullable = false, length = 400)
     private String address;
 
+    @Lob
     @Column(name = "role", nullable = false)
     private String role;
 
@@ -70,24 +71,36 @@ public class User implements UserDetails {
     private String x;
 
     @Column(name = "createTime", nullable = false)
-    private Instant createTime;
+    private LocalDateTime createTime;
 
     @Column(name = "updateTime", nullable = false)
-    private Instant updateTime;
+    private LocalDateTime updateTime;
 
-    public Instant getUpdateTime() {
+    @Lob
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Instant updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 
-    public Instant getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Instant createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
@@ -211,6 +224,18 @@ public class User implements UserDetails {
         this.name = name;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
@@ -246,17 +271,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 }

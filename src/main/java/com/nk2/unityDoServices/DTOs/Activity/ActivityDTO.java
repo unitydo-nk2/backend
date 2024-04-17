@@ -1,12 +1,13 @@
 package com.nk2.unityDoServices.DTOs.Activity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nk2.unityDoServices.Entities.Activity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -21,24 +22,31 @@ public class ActivityDTO {
     private String activityName;
     private String activityBriefDescription;
     private String activityDescription;
-    private Instant activityDate;
-    private Instant registerStartDate;
-    private Instant registerEndDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime activityDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime registerStartDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime registerEndDate;
     private Integer amount;
     private Integer locationId;
     private String locationName;
     private String googleMapLink;
-    private Instant announcementDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime announcementDate;
     private String activityStatus;
     private Integer isGamification;
     private String suggestionNotes;
     private Integer categoryId;
     private String category;
     private String mainCategory;
-    private Instant lastUpdate;
-    private Instant createTime;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastUpdate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
     private String activityFormat;
-    private Instant activityEndDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime activityEndDate;
 
     public String getActivityDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm").withZone(ZoneId.of("Asia/Bangkok"));

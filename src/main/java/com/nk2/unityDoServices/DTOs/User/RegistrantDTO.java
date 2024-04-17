@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,6 +19,6 @@ public class RegistrantDTO {
     private String surName;
     private String gender;
     private String status;
-    private Instant registrationDate;
+    private LocalDateTime registrationDate;
     private Integer registrationId;
 }

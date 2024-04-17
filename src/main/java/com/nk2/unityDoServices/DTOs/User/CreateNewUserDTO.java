@@ -13,6 +13,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -50,7 +51,7 @@ public class CreateNewUserDTO {
     private String line;
     private String instagram;
     private String x;
-    private Instant createTime;
-    private Instant updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }
 

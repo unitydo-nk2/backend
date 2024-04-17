@@ -25,8 +25,9 @@ public class AuthenticationController {
     private UserServices userServices;
 
     @PostMapping("/registration")
-    public User createNewUser(@RequestPart("user") CreateNewUserDTO user) {
-        return userServices.save(user);
+    public ResponseEntity createNewUser(@RequestPart("user") CreateNewUserDTO user,HttpServletResponse response,
+                              HttpServletRequest request) throws Exception{
+        return authenticationServices.save(user,response,request);
     }
 
     @PostMapping("/login")
@@ -44,7 +45,6 @@ public class AuthenticationController {
                 response,
                 request);
     }
-
     @PostMapping("/favoriteCategory")
     public FavoriteCategory setUserFavoriteCategory(@Valid @RequestPart("favoriteCategory")
                                                             SetFavoriteCategoryDTO favoriteCategory) {
