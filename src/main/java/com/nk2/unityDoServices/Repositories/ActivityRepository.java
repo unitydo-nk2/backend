@@ -29,7 +29,8 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
 
     @Query(value="SELECT * " +
             "FROM activity a " +
-            "AND a.activityStatus = 'Active' "+
+            "WHERE a.activityStatus = 'Active' "+
+            "OR a.activityStatus = 'Done' " +
             "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
     List<Activity> findAllActiveActivity();
 
