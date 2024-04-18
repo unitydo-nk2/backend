@@ -39,9 +39,9 @@ public class ActivityMapperService {
         dto.setActivityBriefDescription((String) result[3]);
         dto.setActivityDescription((String) result[4]);
         dto.setActivityDate(((Timestamp) result[5]).toLocalDateTime());
-        dto.setRegisterStartDate(((Timestamp) result[6]).toLocalDateTime());
-        dto.setRegisterEndDate(((Timestamp) result[7]).toLocalDateTime());
-        dto.setActivityEndDate(((Timestamp) result[8]).toLocalDateTime());
+        dto.setActivityEndDate(((Timestamp) result[6]).toLocalDateTime());
+        dto.setRegisterStartDate(((Timestamp) result[7]).toLocalDateTime());
+        dto.setRegisterEndDate(((Timestamp) result[8]).toLocalDateTime());
         dto.setAmount(((Number) result[9]).intValue());
         if (result[10] != null) {
             int intValue = ((Number) result[10]).intValue();
@@ -70,9 +70,9 @@ public class ActivityMapperService {
         dto.setActivityBriefDescription((String) result[3]);
         dto.setActivityDescription((String) result[4]);
         dto.setActivityDate(((Timestamp) result[5]).toLocalDateTime());
-        dto.setRegisterStartDate(((Timestamp) result[6]).toLocalDateTime());
-        dto.setRegisterEndDate(((Timestamp) result[7]).toLocalDateTime());
-        dto.setActivityEndDate(((Timestamp) result[8]).toLocalDateTime());
+        dto.setActivityEndDate(((Timestamp) result[6]).toLocalDateTime());
+        dto.setRegisterStartDate(((Timestamp) result[7]).toLocalDateTime());
+        dto.setRegisterEndDate(((Timestamp) result[8]).toLocalDateTime());
         dto.setAmount(((Number) result[9]).intValue());
         if (result[10] != null) {
             int intValue = ((Number) result[10]).intValue();
@@ -98,7 +98,7 @@ public class ActivityMapperService {
         dto.setActivityOwnerId(((Number) result[1]).intValue());
         dto.setActivityName((String) result[2]);
         dto.setActivityDate(((Timestamp) result[5]).toLocalDateTime());
-        dto.setActivityEndDate(((Timestamp) result[8]).toLocalDateTime());
+        dto.setActivityEndDate(((Timestamp) result[6]).toLocalDateTime());
         dto.setAmount(((Number) result[9]).intValue());
         dto.setUserRegistration(((Number) result[19]).intValue());
         return dto;

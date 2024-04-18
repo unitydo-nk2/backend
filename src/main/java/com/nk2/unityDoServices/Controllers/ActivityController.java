@@ -42,6 +42,11 @@ public class ActivityController {
         return activityServices.getActivityManagement(httpServletRequest);
     }
 
+//    @GetMapping("/popular")
+//    public List<Object[]> getActivityPopularActivity() {
+//        return activityServices.getPopularActivity();
+//    }
+
     @GetMapping("/popular")
     public List<PopularActivityDTO> getActivityPopularActivity() {
         return activityServices.getPopularActivity();

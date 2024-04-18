@@ -134,6 +134,23 @@ public class ActivityServices {
         return activityListDTOs;
     }
 
+//    public List<Object[]> getPopularActivity() {
+//        List<Object[]> activitiesQuery = repository.FindAllByFromUserCount();
+//        List<ActivityWithUserCountDTO> activityList = activityMapperService.mapToActivityWithUserCountDTO(activitiesQuery);
+//        List<PopularActivityDTO> popularActivityList = new ArrayList<>();
+//
+//        for(ActivityWithUserCountDTO activity:activityList){
+//            PopularActivityDTO popularActivity = modelMapper.map(activity,PopularActivityDTO.class);
+//            List<Image> img = imageRepository.getImagePosterbyActivityId(popularActivity.getActivityId());
+//            if (img.isEmpty()) {
+//                popularActivity.setImagePath(null);
+//            } else {
+//                popularActivity.setImagePath(img.get(0).getImagepath());
+//            }
+//            popularActivityList.add(popularActivity);
+//        }
+//        return activitiesQuery;
+//    }
 
     public List<PopularActivityDTO> getPopularActivity() {
         List<Object[]> activitiesQuery = repository.FindAllByFromUserCount();
