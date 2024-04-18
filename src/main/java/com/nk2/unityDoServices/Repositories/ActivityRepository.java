@@ -14,7 +14,7 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "WHERE a.activitydate >= NOW() " +
             "AND a.registerEndDate >= NOW() " +
             "AND a.activityStatus = 'Active' "+
-            "AND a.activityOwener = :activityOwnerId "+
+            "AND a.activityOwner = :activityOwnerId "+
             "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
     List<Activity> findByActivityOwner(Integer activityOwnerId);
 
