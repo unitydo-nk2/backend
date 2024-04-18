@@ -13,8 +13,8 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "FROM activity a " +
             "WHERE a.activitydate >= NOW() " +
             "AND a.registerEndDate >= NOW() " +
-            "AND a.activityStatus = 'Active'"+
-            "AND a.activityOwener = :activityOwnerId"+
+            "AND a.activityStatus = 'Active' "+
+            "AND a.activityOwener = :activityOwnerId "+
             "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
     List<Activity> findByActivityOwner(Integer activityOwnerId);
 
@@ -22,14 +22,14 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "FROM activity a " +
             "WHERE a.activitydate >= NOW() " +
             "AND a.registerEndDate >= NOW() " +
-            "AND a.activityStatus = 'Active'"+
-            "OR a.activityStatus = 'Done'"+
+            "AND a.activityStatus = 'Active' " +
+            "OR a.activityStatus = 'Done' " +
             "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
     List<Activity> findAllAvailableActivity();
 
     @Query(value="SELECT * " +
             "FROM activity a " +
-            "AND a.activityStatus = 'Active'"+
+            "AND a.activityStatus = 'Active' "+
             "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
     List<Activity> findAllActiveActivity();
 
