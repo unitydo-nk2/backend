@@ -269,7 +269,7 @@ public class UserServices{
                 id + " does not exist !!!"));
 
         if (user.getRole().equals("activityOwner")) {
-            List<Activity> activityList = activityRepository.findByActivityOwner(user);
+            List<Activity> activityList = activityRepository.findByActivityOwner(user.getId());
             for (Activity activity : activityList) {
                 activity.setActivityStatus("Inactive");
                 activityRepository.saveAndFlush(activity);
