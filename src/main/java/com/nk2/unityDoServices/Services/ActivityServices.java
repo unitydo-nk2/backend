@@ -113,10 +113,10 @@ public class ActivityServices {
         List<Activity> activityList = new ArrayList<>();
 
         if (targetUser.getRole().equals("activityOwner")) {
-            activityList = repository.findByActivityOwner(targetUser);
+            activityList = repository.findByActivityOwner(targetUser.getId());
 
         } else if (targetUser.getRole().equals("admin")) {
-            activityList = repository.findAll();
+            activityList = repository.findAllActiveActivity();
         }
 
         List<ActivityListDTO> activityListDTOs = new ArrayList<>();
@@ -402,16 +402,16 @@ public class ActivityServices {
     public Integer delete(HttpServletRequest httpServletRequest, Integer id) {
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User activityOwner = userServices.findUserByEmail(email);
+        Activity activity = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                id + " does not exist !!!"));
 
         if (activityOwner.getRole().equals("activityOwner")) {
-            if (!activityOwner.getId().equals(id)) {
+            if (!activity.getActivityOwner().getId().equals(activityOwner.getId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "this user is not belongs to you !");
+                        "this activity is not belongs to you !");
             }
         }
 
-        Activity activity = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                id + " does not exist !!!"));
         activity.setActivityStatus("Inactive");
 
         List<Registration> registrationList = registrationRepository.FindAllRegistrationFromActivityId(id);
@@ -477,18 +477,20 @@ public class ActivityServices {
     public Activity updateActivityToDone(Integer id){
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User targetUser = userServices.findUserByEmail(email);
-        Activity targetActivity = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity id " + id + " Does Not Exist !!!"));
+
+        Activity targetActivity = repository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity id " + id + " Does Not Exist !!!"));
+
         if(!targetUser.getId().equals(targetActivity.getActivityOwner().getId())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "this activity is not belongs to you !");
         }
-        System.out.println("targetActivity "+targetActivity.getActivityDate());
-        System.out.println("now "+Instant.now());
-        System.out.println("is before "+targetActivity.getActivityDate().isBefore(LocalDateTime.now()));
-        if(!targetActivity.getActivityDate().isBefore(LocalDateTime.now())){
+
+        if(!targetActivity.getActivityEndDate().isBefore(LocalDateTime.now())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "cannot update to done since activity haven't arrived");
         }
+
         Activity updateActivity = repository.findById(id).map(activity -> {
             activity.setActivityStatus(ActivityStatus.Done.name());
             return activity;

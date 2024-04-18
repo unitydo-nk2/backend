@@ -9,7 +9,14 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ActivityRepository extends JpaRepository<Activity,Integer> {
-    List<Activity> findByActivityOwner(User activityOwner);
+    @Query(value="SELECT * " +
+            "FROM activity a " +
+            "WHERE a.activitydate >= NOW() " +
+            "AND a.registerEndDate >= NOW() " +
+            "AND a.activityStatus = 'Active'"+
+            "AND a.activityOwener = :activityOwnerId"+
+            "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
+    List<Activity> findByActivityOwner(Integer activityOwnerId);
 
     @Query(value="SELECT * " +
             "FROM activity a " +
@@ -18,6 +25,12 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
             "AND a.activityStatus = 'Active'"+
             "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
     List<Activity> findAllAvailableActivity();
+
+    @Query(value="SELECT * " +
+            "FROM activity a " +
+            "AND a.activityStatus = 'Active'"+
+            "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), a.activitydate)) ", nativeQuery = true)
+    List<Activity> findAllActiveActivity();
 
     @Query(value="SELECT a.*, COUNT(ah.activityHistoryId) as userCount " +
             "FROM activity a " +
