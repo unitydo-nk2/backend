@@ -87,7 +87,7 @@ public class ActivityDTO {
     public ActivityDTO(Activity activity) {
         this.activityId = activity.getId();
         this.activityOwner = activity.getActivityOwner().getId();
-        this.activityOwnerUserName = activity.getActivityOwner().getUsername();
+        this.activityOwnerUserName = activity.getActivityOwner().getNickName();
         this.activityName = activity.getActivityName();
         this.activityBriefDescription = activity.getActivityBriefDescription();
         this.activityDescription = activity.getActivityDescription();

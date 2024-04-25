@@ -56,21 +56,16 @@ public class AuthenticationServices {
     }
 
     public ResponseEntity emailMatchSystem(@Valid String email, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        System.out.println("username "+email);
-        System.out.println("email exists "+repository.existsByEmail(email));
         if(repository.existsByEmail(email)){
             User user = repository.findByEmail(email)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NO_CONTENT, "A user with the specified email DOES NOT exist"));
-            System.out.println("user "+ user);
 
             final UserDetails userDetails = userDetailsService
                     .loadUserByUsername(email);
 
             final String token = jwtService.generateUserToken(user);
-            System.out.println("token : " + token);
 
             final String refreshToken = jwtService.generateRefreshToken(token);
-            System.out.println("refreshToken : " + refreshToken);
 
             return ResponseEntity.ok(new JwtResponse("Login Success", token, refreshToken));
     }else{
@@ -129,26 +124,19 @@ public class AuthenticationServices {
                                 HttpServletRequest request) throws Exception {
         Map<String, String> errorMap = new HashMap<>();
         String status;
-        System.out.println("login start");
-        System.out.println("email exists : " + repository.existsByEmail(userLogin.getEmail()));
 
         if (repository.existsByEmail(userLogin.getEmail())) {
             User user = repository.findByEmail(userLogin.getEmail())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "A user with the specified email DOES NOT exist"));
-            System.out.println("password matches : " + argon2PasswordEncoder.matches(userLogin.getPassword(), user.getPassword()));
             if (argon2PasswordEncoder.matches(userLogin.getPassword(), user.getPassword())) {
-                System.out.println(" : do true : ");
-
 //                authenticate(userLogin.getEmail(), userLogin.getPassword());
 
                 final UserDetails userDetails = userDetailsService
                         .loadUserByUsername(userLogin.getEmail());
 
                 final String token = jwtService.generateUserToken(user);
-                System.out.println("token : " + token);
 
                 final String refreshToken = jwtService.generateRefreshToken(token);
-                System.out.println("refreshToken : " + refreshToken);
 
                 return ResponseEntity.ok(new JwtResponse("Login Success", token, refreshToken));
             } else {

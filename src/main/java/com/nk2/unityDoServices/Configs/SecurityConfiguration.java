@@ -78,7 +78,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET,GUEST_GET_AVAILABLE).permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/activities/management","/api/activities/userRegistration","/api/activities/registration/{activityId}"
                                 ,"/api/users/{id}/activities","/api/users/registration/{id}","/api/users/{activityId}/registrants").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
-                        .requestMatchers(HttpMethod.POST,"/api/tracks/favorite").hasAnyAuthority(Role.user.name())
+                        .requestMatchers(HttpMethod.POST,"/api/tracks/favorite/{activityId}").hasAnyAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.PATCH,"/api/tracks/unFavorite/{favoriteId}","api/categories/favoriteCategory/{id}","/api/activities/review/{registrationId}").hasAnyAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name(),Role.user.name())
                         .requestMatchers(HttpMethod.POST,"/api/activities","/api/activities/images").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
@@ -87,7 +87,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST,"/api/activities/{activityId}/registration","/api/auth/**").hasAnyAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.PATCH,"/api/users/{id}").hasAnyAuthority(Role.admin.name(),Role.user.name())
                         .requestMatchers(HttpMethod.PATCH,"/api/activities/updateToDone/{id}").hasAnyAuthority(Role.admin.name(),Role.activityOwner.name())
-                        .requestMatchers(HttpMethod.GET,"/api/activities/recommends","/api/activities/favorite","/api/categories/favorite").hasAuthority(Role.user.name())
+                        .requestMatchers(HttpMethod.GET,"/api/activities/recommends","/api/activities/favorite","/api/categories/favorite","/api/users/isRegistered/{activityId}","/api/activities/{activityId}/isFavorite").hasAuthority(Role.user.name())
                         .requestMatchers(HttpMethod.GET,"/api/users/list").hasAuthority(Role.admin.name())
                         .anyRequest().authenticated()
                 );

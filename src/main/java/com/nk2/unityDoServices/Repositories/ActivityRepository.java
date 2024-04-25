@@ -67,8 +67,10 @@ public interface ActivityRepository extends JpaRepository<Activity,Integer> {
 
     @Query(value="SELECT a.*, COUNT(r.userId) as userCount " +
             "FROM activity a " +
-            "INNER JOIN registration r ON a.activityId = r.activityId " +
+            "INNER JOIN registration r " +
+            "ON a.activityId = r.activityId " +
             "WHERE a.activityOwner = :activityId "+
+            "AND a.activityStatus = 'Active' "+
             "GROUP BY a.activityId " +
             "ORDER BY a.activityName ASC ", nativeQuery = true)
     List<Object[]> FindActivityByStatusAndUserIdOwnedByActivityOwner(Integer activityId);

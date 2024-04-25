@@ -15,6 +15,7 @@ import com.nk2.unityDoServices.Utils.ListMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,12 @@ public class ActivityServices {
     @Autowired
     private ActivityReviewRepository activityReviewRepository;
 
+    @Autowired
+    private ActivityFavoriteRepository activityFavoriteRepository;
+
+    @Value("${recommendation.path}")
+    private String recommendationPath;
+
     public List<ActivityListDTO> getActivityList(HttpServletRequest httpServletRequest) {
         List<Activity> activityList = repository.findAllAvailableActivity();
         List<ActivityListDTO> activityListDTOs = new ArrayList<>();
@@ -94,6 +101,15 @@ public class ActivityServices {
         }
 
         return activityListDTOs;
+    }
+
+    public Boolean getFavoriteStatus(Integer id){
+        UserDetailsDTO user = userServices.getUserByEmail();
+        ActivityFavorite activityReview = activityFavoriteRepository.findActivityFavorite(id,user.getUserId());
+        if (activityReview == null){
+            return false;
+        }
+        return true;
     }
 
     public List<ActivityReviewListDTO> getActivityReviews(Integer id){
@@ -175,9 +191,7 @@ public class ActivityServices {
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
 
         for (Activity activity : activityList) {
-            System.out.println("activity "+activity.getId());
             ActivityCardSliderListDTO upComingActivity = new ActivityCardSliderListDTO(activity);
-            System.out.println("upComingActivity "+upComingActivity.getActivityId());
             List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
             if (img.isEmpty()) {
                 upComingActivity.setImagePath(null);
@@ -191,7 +205,6 @@ public class ActivityServices {
     }
 
     public List<ActivityCardSliderListDTO> getPersonalRecommendActivity(HttpServletRequest httpServletRequest){
-        System.out.println("do getRecommendsActivity");
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User targetUser = userServices.findUserByEmail(email);
 
@@ -201,33 +214,24 @@ public class ActivityServices {
         }
 
         // URL to fetch data from
-        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
-//        String url = "http://127.0.0.1:5050/api/recommendActivities/"+targetUser.getId();
-
-        System.out.println("fetch to "+url);
+//        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
+        String url = recommendationPath+targetUser.getId();
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
         // Fetch data from the URL and deserialize into a list of Activity objects
         ResponseEntity<ActivityReceiverDTO[]> response = restTemplate.getForEntity(url, ActivityReceiverDTO[].class);
-        System.out.println("response : "+response);
 
         List<ActivityReceiverDTO> activityList = Arrays.asList(response.getBody());
-        System.out.println(activityList);
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
 
         for (ActivityReceiverDTO activity : activityList) {
-            System.out.println("activity : "+activity.getActivityId());
 
             Activity targetActivity = repository.findById(activity.getActivityId()).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
-            System.out.println("targetActivity : "+targetActivity.getId());
 
             ActivityCardSliderListDTO upComingActivity = new ActivityCardSliderListDTO(targetActivity);
-
-            System.out.println("upComingActivity : "+upComingActivity.getActivityId());
-
 
             List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
             if (img.isEmpty()) {
@@ -237,12 +241,10 @@ public class ActivityServices {
             }
             activityListDTOs.add(upComingActivity);
         }
-        System.out.println(activityListDTOs);
         return activityListDTOs;
     }
 
     public List<ActivityCardSliderListDTO> getRecommendsActivity(HttpServletRequest httpServletRequest){
-        System.out.println("do getRecommendsActivity");
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User targetUser = userServices.findUserByEmail(email);
 
@@ -252,32 +254,25 @@ public class ActivityServices {
         }
 
         // URL to fetch data from
-        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
-//        String url = "http://127.0.0.1:5050/api/recommendActivities/"+targetUser.getId();
+//        String url = "http://172.26.0.2:5050/api/recommendActivities/"+targetUser.getId();
 
-        System.out.println("fetch to "+url);
+        String url = recommendationPath+targetUser.getId();
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
         // Fetch data from the URL and deserialize into a list of Activity objects
         ResponseEntity<ActivityReceiverDTO[]> response = restTemplate.getForEntity(url, ActivityReceiverDTO[].class);
-        System.out.println("response : "+response);
 
         List<ActivityReceiverDTO> activityList = Arrays.asList(response.getBody());
-        System.out.println(activityList);
         List<ActivityCardSliderListDTO> activityListDTOs = new ArrayList<>();
 
         for (ActivityReceiverDTO activity : activityList) {
-            System.out.println("activity : "+activity.getActivityId());
 
             Activity targetActivity = repository.findById(activity.getActivityId()).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
-            System.out.println("targetActivity : "+targetActivity.getId());
 
             ActivityCardSliderListDTO upComingActivity = new ActivityCardSliderListDTO(targetActivity);
-
-            System.out.println("upComingActivity : "+upComingActivity.getActivityId());
 
 
             List<Image> img = imageRepository.getImagePosterbyActivityId(upComingActivity.getActivityId());
@@ -288,7 +283,6 @@ public class ActivityServices {
             }
             activityListDTOs.add(upComingActivity);
         }
-        System.out.println(activityListDTOs);
         return activityListDTOs;
     }
 
@@ -317,7 +311,6 @@ public class ActivityServices {
     }
 
     public LocalDateTime convertDateTime(String dateTimeLocalString) {
-        System.out.println("dateTimeLocalString = " + dateTimeLocalString);
         LocalDateTime localDateTime = LocalDateTime.parse(dateTimeLocalString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
         ZoneId zoneId = ZoneId.of("UTC");
         ZonedDateTime finaleDate = localDateTime.atZone(zoneId);
@@ -364,7 +357,6 @@ public class ActivityServices {
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User activityOwner = userServices.findUserByEmail(email);
         Activity newActivity = new Activity();
-        System.out.println("getAmount  : " + activity.getAmount());
 //        User activityOwner = userRepository.findById(activity.getUserId()) .orElseThrow(() -> new ResponseStatusException(
 //                HttpStatus.NOT_FOUND, "Event id " + activity.getCategoryId() + " Does Not Exist !!!"));
         Category activityCategory = categoryRepository.findById(activity.getCategoryId())
@@ -390,11 +382,6 @@ public class ActivityServices {
         newActivity.setCreateTime(LocalDateTime.now());
         newActivity.setActivityEndDate(convertDateTime(activity.getActivityEndDate()));
         newActivity.setActivityStatus("Active");
-        System.out.println(activity.getActivityDate() + " new activity getActivityDate " + newActivity.getActivityDate());
-        System.out.println(activity.getActivityEndDate() + " new activity getActivityEndDate " + newActivity.getActivityEndDate());
-        System.out.println(activity.getRegisterStartDate() + " new activity getRegisterStartDate " + newActivity.getRegisterStartDate());
-        System.out.println(activity.getRegisterEndDate() + " new activity getRegisterEndDate " + newActivity.getRegisterEndDate());
-        System.out.println(activity.getAnnouncementDate() + " new activity getAnnouncementDate " + newActivity.getAnnouncementDate());
         repository.saveAndFlush(newActivity);
         return new ActivityDTO(newActivity);
     }
@@ -428,17 +415,13 @@ public class ActivityServices {
     public ActivityReviewDTO reviewActivity(Integer id, ActivityReviewDTO review){
         UserDetailsDTO user = userServices.getUserByEmail();
         Registration registration = registrationRepository.FindAllByActivityAndUserID(id,user.getUserId());
-        System.out.println("registration "+ registration.getId());
-        System.out.println("registration is null "+ registration == null );
-        System.out.println("registration status "+ registration.getStatus() );
-        System.out.println("registration status is success "+ registration.getStatus().equals(RegistrationStatus.success.name()) );
 
         if(registration == null || !(registration.getStatus().equals(RegistrationStatus.success.name()))){
             throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "Only participators can review the activity. You haven't register to this activity yet.");
         }
 
         ActivityReview activityReview = activityReviewRepository.findAllByRegistrationId(registration.getId());
-        if(activityReview != null || activityReview.getId() != null){
+        if(activityReview != null){
             throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "You already reviewed the activity.");
 
         }
@@ -507,9 +490,7 @@ public class ActivityServices {
     }
 
     public Registration registerActivity(HttpServletRequest httpServletRequest, Integer userId, Integer activityId) {
-        System.out.println("registerActivity called");
         UserDetailsDTO user = userServices.getUserByEmail();
-        System.out.println("userid : "+userId+",, user id from token : "+user.getUserId());
         if (user != null) {
             if (!(user.getUserId().equals(userId.intValue()))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -564,18 +545,14 @@ public class ActivityServices {
     }
 
     public List<ActivityWithRegistrationNumberDTO> getActivityRegistrationNumberDTO() {
-        System.out.println("getActivityRegistrationNumberDTO");
-
         String email = jwtService.extractUsername(jwtAuthenticationFilter.getJwtToken());
         User targetUser = userServices.findUserByEmail(email);
         List<Object[]> activitiesQuery = new ArrayList<>();
 
         if (targetUser.getRole().equals("activityOwner")) {
-            System.out.println("get activity as ActivityOwner");
             activitiesQuery = repository.FindActivityByStatusAndUserIdOwnedByActivityOwner(targetUser.getId());
 
         } else if (targetUser.getRole().equals("admin")) {
-            System.out.println("get activity as Admin");
             activitiesQuery = repository.FindActivityWithRegisterAmount();
         }
 

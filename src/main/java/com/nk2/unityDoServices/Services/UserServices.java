@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.file.FileSystems;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -184,6 +183,17 @@ public class UserServices{
         }
         return listMapper.mapList(registrationList, RegistrantDTO.class, modelMapper) ;
     }
+
+    public Boolean isUserRegistered(Integer activityId){
+        UserDetailsDTO user = getUserByEmail();
+        ActivityReview activityReview = activityReviewRepository.existsByRegistrationId(activityId,user.getUserId());
+        if(activityReview == null){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
 
     public FavoriteCategory setUserFavoriteCategory(SetFavoriteCategoryDTO favoriteCategory) {
         User user = findUserByEmail(favoriteCategory.getUserEmail());

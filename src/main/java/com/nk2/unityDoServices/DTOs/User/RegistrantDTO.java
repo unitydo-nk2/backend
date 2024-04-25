@@ -1,5 +1,6 @@
 package com.nk2.unityDoServices.DTOs.User;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class RegistrantDTO {
     private String surName;
     private String gender;
     private String status;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime registrationDate;
     private Integer registrationId;
 }

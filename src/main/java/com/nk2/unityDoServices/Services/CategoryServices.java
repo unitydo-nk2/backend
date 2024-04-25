@@ -39,19 +39,16 @@ public class CategoryServices {
 
     public List<CategoryDTO> getCategoryList() {
         List<MainCategory> categoryList = mainCategoryRepository.findAll();
-        System.out.println("categoryList " + categoryList);
         return listMapper.mapList(categoryList, CategoryDTO.class, modelMapper);
     };
 
     public List<AllCategoryDTO> getCategoryWithSubCategory(){
         List<Category> categoryList = categoryRepository.findAll();
-        System.out.println("categoryList " + categoryList);
         return  listMapper.mapList(categoryList, AllCategoryDTO.class, modelMapper);
     }
 
     public List<FavoriteCategoryDTO> getUserCategoriesFavorite() {
         UserDetailsDTO user = userServices.getUserByEmail();
-        System.out.println("find fav category of : "+ user.getUserId());
         List<FavoriteCategory> categoryList = favoriteCategoryRepository.findCategoryFavoriteByUserId(user.getUserId());
         return  listMapper.mapList(categoryList, FavoriteCategoryDTO.class, modelMapper);
     }

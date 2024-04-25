@@ -1,5 +1,6 @@
 package com.nk2.unityDoServices.Services;
 
+import com.nk2.unityDoServices.DTOs.User.UserDetailsDTO;
 import com.nk2.unityDoServices.Entities.Activity;
 import com.nk2.unityDoServices.Entities.ActivityFavorite;
 import com.nk2.unityDoServices.Entities.User;
@@ -34,7 +35,6 @@ public class UserHistoryServices {
             User user = userServices.findUserByEmail(email);
             userHistory.setUserId(user);
         }else{
-            System.out.println("user id is null");
             userHistory.setUserId(null);
         }
         Activity activity = activityRepository.findById(activityId)
@@ -43,14 +43,16 @@ public class UserHistoryServices {
         return userActivityHistoryRepository.saveAndFlush(userHistory);
     }
 
-    public void setUserFavorite(Integer activityId, String email){
-        User user = userServices.findUserByEmail(email);
+    public void setUserFavorite(Integer activityId){
+        UserDetailsDTO user = userServices.getUserByEmail();
+        User targetUser = userRepository.findById(user.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                user.getUserId() + " does not exist !!!"));
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity is not found"));
-        ActivityFavorite activityFavorite = activityFavoriteRepository.findActivityFavorite(activityId,user.getId());
+        ActivityFavorite activityFavorite = activityFavoriteRepository.findActivityFavorite(activityId,user.getUserId());
         if(activityFavorite == null){
             ActivityFavorite activityfavorite = new ActivityFavorite();
-            activityfavorite.setUserId(user);
+            activityfavorite.setUserId(targetUser);
             activityfavorite.setActivityId(activity);
             activityFavoriteRepository.saveAndFlush(activityfavorite);
         }else{
@@ -58,9 +60,9 @@ public class UserHistoryServices {
         }
     }
 
-    public Integer setUserUnFavorite(Integer activityId, String email){
-        User user = userServices.findUserByEmail(email);
-        ActivityFavorite activityFavorite = activityFavoriteRepository.findActivityFavorite(activityId,user.getId());
+    public Integer setUserUnFavorite(Integer activityId){
+        UserDetailsDTO user = userServices.getUserByEmail();
+        ActivityFavorite activityFavorite = activityFavoriteRepository.findActivityFavorite(activityId,user.getUserId());
         activityFavoriteRepository.deleteById(activityFavorite.getId());
         return activityFavorite.getId();
     }

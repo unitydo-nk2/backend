@@ -18,12 +18,12 @@ public class UserHistoryController {
     }
 
     @PostMapping("/favorite/{activityId}")
-    public void setUserFavorite(@PathVariable Integer activityId, @Valid @RequestBody String email) {
-        userHistoryServices.setUserFavorite(activityId,email);
+    public void setUserFavorite(@PathVariable Integer activityId) {
+        userHistoryServices.setUserFavorite(activityId);
     }
 
     @PatchMapping("/unFavorite/{activityId}")
-    public Integer setUserUnFavorite(@PathVariable Integer activityId, @Valid @RequestBody String email) {
-        return userHistoryServices.setUserUnFavorite(activityId,email);
+    public Integer setUserUnFavorite(@PathVariable Integer activityId) {
+        return userHistoryServices.setUserUnFavorite(activityId);
     }
 }

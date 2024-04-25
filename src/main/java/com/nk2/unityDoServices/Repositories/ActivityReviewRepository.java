@@ -19,4 +19,11 @@ public interface ActivityReviewRepository extends JpaRepository<ActivityReview,I
             "ORDER BY a.createTime ASC;", nativeQuery = true)
     ActivityReview findAllByRegistrationId (Integer id);
 
+    @Query(value = "SELECT a.* " +
+            "FROM activityReview a " +
+            "INNER JOIN registration r " +
+            "ON a.registrationId = r.registrationId  " +
+            "WHERE r.activityid = :activityId  " +
+            "AND r.userId = :userId  ", nativeQuery = true)
+    ActivityReview existsByRegistrationId (Integer activityId, Integer userId);
 }

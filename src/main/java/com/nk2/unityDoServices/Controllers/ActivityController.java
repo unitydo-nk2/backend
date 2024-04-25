@@ -62,6 +62,11 @@ public class ActivityController {
         return activityServices.getSimilarActivity(activityId);
     }
 
+    @GetMapping("/{activityId}/isFavorite")
+    public Boolean getFavoriteStatus(@PathVariable Integer activityId) {
+        return activityServices.getFavoriteStatus(activityId);
+    }
+
     @GetMapping("/recommends")
     public List<ActivityCardSliderListDTO> getRecommendActivity(HttpServletRequest request) {
         return activityServices.getRecommendsActivity(request) ;

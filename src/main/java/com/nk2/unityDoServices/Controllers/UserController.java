@@ -43,6 +43,11 @@ public class UserController {
         return userServices.getRegisteredActivity();
     }
 
+    @GetMapping("/isRegistered/{activityId}")
+    public Boolean isUserRegistered(@PathVariable Integer activityId) {
+        return userServices.isUserRegistered(activityId);
+    }
+
     @GetMapping("/registration/{id}")
     public RegistrantDetailsDTO getActivityRegistrants(
             @PathVariable Integer id) {
