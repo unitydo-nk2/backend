@@ -185,13 +185,28 @@ public class UserServices{
     }
 
     public Boolean isUserRegistered(Integer activityId){
+        System.out.println("called");
         UserDetailsDTO user = getUserByEmail();
-        ActivityReview activityReview = activityReviewRepository.existsByRegistrationId(activityId,user.getUserId());
-        if(activityReview == null){
+        Registration registration = registrationRepository.FindAllByActivityAndUserID(activityId,user.getUserId());
+        if(registration == null) {
+            System.out.println("registration is null");
             return false;
-        }else{
-            return true;
         }
+        System.out.println("registration status "+registration.getStatus());
+
+        if(registration.getStatus().equals("success")){
+            System.out.println("registration is success");
+            return true;
+        }else{
+            System.out.println("registration is not success");
+            return false;
+        }
+//        ActivityReview activityReview = activityReviewRepository.existsByRegistrationId(activityId,user.getUserId());
+//        if(activityReview == null){
+//            return false;
+//        }else{
+//            return true;
+//        }
     }
 
 

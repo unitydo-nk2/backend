@@ -24,6 +24,7 @@ public interface ActivityReviewRepository extends JpaRepository<ActivityReview,I
             "INNER JOIN registration r " +
             "ON a.registrationId = r.registrationId  " +
             "WHERE r.activityid = :activityId  " +
-            "AND r.userId = :userId  ", nativeQuery = true)
+            "AND r.userId = :userId  " +
+            "AND r.status = 'success'", nativeQuery = true)
     ActivityReview existsByRegistrationId (Integer activityId, Integer userId);
 }
